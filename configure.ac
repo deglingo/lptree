@@ -12,6 +12,7 @@ LT_INIT
 
 AC_CONFIG_FILES([ \
   Makefile \
+  lptree/Makefile \
 ])
 AC_CONFIG_FILES([lptree.pc])
 AC_OUTPUT
