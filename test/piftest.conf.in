@@ -1,0 +1,11 @@
+#
+
+[DEFAULT]
+
+suite = lptree-test
+
+cflags = @PIFTEST_CFLAGS@
+
+ldflags = @PIFTEST_LIBS@
+
+modules = test_base
