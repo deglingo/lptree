@@ -1,0 +1,13 @@
+*~
+ChangeLog
+COPYING
+INSTALL
+aclocal.m4
+autom4te.cache
+config.guess
+config.sub
+install-sh
+missing
+ltmain.sh
+configure
+Makefile.in
