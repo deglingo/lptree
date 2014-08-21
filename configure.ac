@@ -4,6 +4,7 @@ AM_INIT_AUTOMAKE
 : ${CFLAGS:=-g -Wall}
 
 AC_SUBST([pkgconfigdir], '${libdir}/pkgconfig')
+AC_SUBST([includelptreedir], ['${includedir}/lptree'])
 
 AC_PROG_CC
 AM_PROG_CC_C_O
