@@ -6,20 +6,30 @@ AM_INIT_AUTOMAKE
 AC_SUBST([pkgconfigdir], '${libdir}/pkgconfig')
 
 AC_PROG_CC
+AM_PROG_CC_C_O
 LT_INIT
 
-# [fixme] check for piftest
-PKG_CHECK_MODULES([PIFTEST], [piftest])
-AC_SUBST([PIFTEST])
-AC_MSG_CHECKING([for piftest])
-if PIFTEST=`which piftest`; then
-    AC_MSG_RESULT([$PIFTEST])
-else
-    AC_MSG_RESULT([no])
-    AC_ERROR([piftest not found])
-fi
+dnl # [fixme] check for piftest
+dnl PKG_CHECK_MODULES([PIFTEST], [piftest])
+dnl AC_SUBST([PIFTEST])
+dnl AC_MSG_CHECKING([for piftest])
+dnl if PIFTEST=`which piftest`; then
+dnl     AC_MSG_RESULT([$PIFTEST])
+dnl else
+dnl     AC_MSG_RESULT([no])
+dnl     AC_ERROR([piftest not found])
+dnl fi
 
 #PKG_CHECK_MODULES([GLIB], [glib-2.0])
+
+# [fixme]
+#AM_PATH_PIFTEST
+AM_PIFTEST_SUITE([test])
+dnl test -d test/.deps || mkdir -vp test/.deps
+dnl for n in lptree-test test_base; do
+dnl     f="test/.deps/$n.Po"
+dnl     test -e "$f" || echo "$n.o: $n.c" >"$f"
+dnl done
 
 AC_CONFIG_FILES([ \
   Makefile \
@@ -27,5 +37,4 @@ AC_CONFIG_FILES([ \
   test/Makefile \
 ])
 AC_CONFIG_FILES([lptree.pc])
-AC_CONFIG_FILES([test/piftest.conf])
 AC_OUTPUT

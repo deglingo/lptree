@@ -1,0 +1,4 @@
+# -*- shell-script -*-
+
+echo "pre-hook: piftest init"
+piftest -M test

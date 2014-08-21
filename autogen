@@ -67,6 +67,10 @@ proc_boot()
 	trace "bootstrapping package '$PACKAGE' $VERSION"
 	# [fixme]
 	echo '[TODO]' >ChangeLog
+    if test -f autogen.pre-hook; then
+        trace "pre-hook..."
+        sh ./autogen.pre-hook || die "pre-hook failed"
+    fi
 	trace "aclocal..."
 	aclocal || die "aclocal failed"
     test $USE_LIBTOOL -eq 0 || {

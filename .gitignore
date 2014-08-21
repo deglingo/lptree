@@ -11,3 +11,5 @@ missing
 ltmain.sh
 configure
 Makefile.in
+compile
+depcomp
