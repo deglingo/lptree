@@ -9,6 +9,8 @@
 
 #include "lptree/lptnspecint.h"
 
+#include "lptree/lptnode.h"
+
 #include "lptree/lpttree.h"
 
 

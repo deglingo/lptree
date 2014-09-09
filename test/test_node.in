@@ -1,0 +1,24 @@
+/* -*- c -*- */
+
+header {
+##include "lptree/lptnspecint.h"
+##include "lptree/lptnode.h"
+}
+
+data { LptNSpec *nspec; }
+
+setup {
+  data->nspec = lpt_nspec_int_new("INT", -10, 10, 2);
+}
+
+teardown {
+  L_OBJECT_CLEAR(data->nspec);
+}
+
+test 
+{
+  LptNode *node;
+  node = lpt_node_new(data->nspec, NULL, NULL);
+  PIF_CHECK(node);
+  L_OBJECT_CLEAR(node);
+}
