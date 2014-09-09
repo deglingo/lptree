@@ -1,0 +1,7 @@
+/* -*- c -*- */
+
+header {
+##include "lptree/lptree.h"
+}
+
+test { PIF_CHECK(LPT_CLASS_NSPEC); }

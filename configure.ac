@@ -32,6 +32,10 @@ dnl     f="test/.deps/$n.Po"
 dnl     test -e "$f" || echo "$n.o: $n.c" >"$f"
 dnl done
 
+PKG_CHECK_MODULES([LOS], [los])
+AC_PATH_PROG([LOS_GENTYPES], [los-gentypes])
+test x"$LOS_GENTYPES" != x || AC_ERROR([los-gentypes not found])
+
 AC_CONFIG_FILES([ \
   Makefile \
   lptree/Makefile \

@@ -5,6 +5,8 @@
 #define _LPTREE_H_
 
 
+#include "lptree/lptnspec.h"
+
 #include "lptree/lpttree.h"
 
 

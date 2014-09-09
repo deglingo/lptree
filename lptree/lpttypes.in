@@ -1,0 +1,6 @@
+/* -*- c++ -*- */
+
+namespace Lpt
+{
+  class NSpec;
+}
