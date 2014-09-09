@@ -14,6 +14,8 @@
 struct _LptNSpec
 {
   LPT_NSPEC_INSTANCE_HEADER;
+
+  gchar *name;
 };
 
 

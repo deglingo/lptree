@@ -7,6 +7,8 @@
 
 #include "lptree/lptnspec.h"
 
+#include "lptree/lptnspecint.h"
+
 #include "lptree/lpttree.h"
 
 
