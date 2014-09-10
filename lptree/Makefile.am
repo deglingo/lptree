@@ -7,7 +7,7 @@ includelptree_HEADERS = \
 	lptnspec.h lptnspec-def.h \
 	lptnspecint.h lptnspecint-def.h \
 	lptnode.h lptnode-def.h \
-	lpttree.h
+	lpttree.h lpttree-def.h
 
 lib_LTLIBRARIES = liblptree.la
 
@@ -22,11 +22,13 @@ liblptree_la_SOURCES = \
 BUILT_SOURCES = \
 	lptnspec-def.h lptnspec.inl \
 	lptnspecint-def.h lptnspecint.inl \
-	lptnode-def.h lptnode.inl
+	lptnode-def.h lptnode.inl \
+	lpttree-def.h lpttree.inl
 
 lptnspec-def.h lptnspec.inl \
 lptnspecint-def.h lptnspecint.inl \
 lptnode-def.h lptnode.inl \
+lpttree-def.h lpttree.inl \
 : lpttypes.stamp-h
 
 lpttypes.stamp-h: lpttypes.in

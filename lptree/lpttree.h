@@ -5,9 +5,8 @@
 #define _LPTTREE_H_
 
 #include "lptree/lptbase.h"
-
-
-typedef struct _LptTree LptTree;
+#include "lptree/lptnode.h"
+#include "lptree/lpttree-def.h"
 
 
 
@@ -15,7 +14,18 @@ typedef struct _LptTree LptTree;
  */
 struct _LptTree
 {
-  int _dummy;
+  LPT_TREE_INSTANCE_HEADER;
+
+  LptNode *root;
+};
+
+
+
+/* LptTreeClass:
+ */
+struct _LptTreeClass
+{
+  LPT_TREE_CLASS_HEADER;
 };
 
 

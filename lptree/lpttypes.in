@@ -5,4 +5,5 @@ namespace Lpt
   class NSpec;
   class NSpecInt : NSpec;
   class Node;
+  class Tree;
 }
