@@ -11,5 +11,5 @@ teardown { /* L_OBJECT_CLEAR(data->tree); */ }
 
 test { 
   PIF_CHECK(data->tree);
-  /* PIF_CHECK(data->tree->root); /\* ?? *\/ */
+  PIF_CHECK(data->tree->root); /* ?? */
 }
