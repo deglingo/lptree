@@ -1,0 +1,17 @@
+/* -*- c -*- */
+
+header {
+##include "lptree/lptnspecdir.h"
+##include <string.h>
+}
+
+data { LptNSpec *nspec; }
+
+setup { data->nspec = lpt_nspec_dir_new("test-dir"); }
+
+teardown { L_OBJECT_CLEAR(data->nspec); }
+
+test {
+  PIF_CHECK(data->nspec);
+  PIF_CHECK(!strcmp(data->nspec->name, "test-dir"));
+}

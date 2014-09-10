@@ -4,6 +4,7 @@ namespace Lpt
 {
   class NSpec;
   class NSpecInt : NSpec;
+  class NSpecDir : NSpec;
   class Node;
   class Tree;
 }
