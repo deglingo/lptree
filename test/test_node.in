@@ -5,20 +5,29 @@ header {
 ##include "lptree/lptnode.h"
 }
 
-data { LptNSpec *nspec; }
-
-setup {
-  data->nspec = lpt_nspec_int_new("INT", -10, 10, 2);
-}
-
-teardown {
-  L_OBJECT_CLEAR(data->nspec);
-}
-
-test 
+unit /* node-int */
 {
-  LptNode *node;
-  node = lpt_node_new(data->nspec, NULL, NULL);
-  PIF_CHECK(node);
-  L_OBJECT_CLEAR(node);
+  data {
+    LptNSpec *nspec;
+    LptNode *node;
+  }
+
+  setup {
+    data->nspec = lpt_nspec_int_new("INT", -10, 10, 2);
+    data->node = lpt_node_new(data->nspec, NULL, NULL);
+  }
+
+  teardown {
+    L_OBJECT_CLEAR(data->node);
+    L_OBJECT_CLEAR(data->nspec);
+  }
+
+  test { 
+    PIF_CHECK(data->node);
+  }
+
+  test {
+    LObject *value = L_OBJECT(l_int_new(42));
+    lpt_node_set_value(data->node, value);
+  }
 }

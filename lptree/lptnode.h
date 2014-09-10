@@ -31,6 +31,8 @@ struct _LptNodeClass
 LptNode *lpt_node_new ( LptNSpec *nspec,
                         LptNode *parent,
                         LObject *key );
+void lpt_node_set_value ( LptNode *node,
+                          LObject *value );
 
 
 

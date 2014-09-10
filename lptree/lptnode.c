@@ -16,3 +16,12 @@ LptNode *lpt_node_new ( LptNSpec *nspec,
   node = LPT_NODE(l_object_new(LPT_CLASS_NODE, NULL));
   return node;
 }
+
+
+
+/* lpt_node_set_value:
+ */
+void lpt_node_set_value ( LptNode *node,
+                          LObject *value )
+{
+}
