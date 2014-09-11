@@ -27,7 +27,11 @@ unit /* node-int */
   }
 
   test {
-    LObject *value = L_OBJECT(l_int_new(42));
-    lpt_node_set_value(data->node, value);
+    LObject *val1, *val2;
+    val1 = L_OBJECT(l_int_new(42));
+    lpt_node_set_value(data->node, val1);
+    val2 = lpt_node_get_value(data->node);
+    PIF_CHECK(L_IS_INT(val2));
+    PIF_CHECK(L_INT_VALUE(val2) == 42);
   }
 }

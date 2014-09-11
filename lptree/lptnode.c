@@ -24,4 +24,17 @@ LptNode *lpt_node_new ( LptNSpec *nspec,
 void lpt_node_set_value ( LptNode *node,
                           LObject *value )
 {
+  l_object_ref(value);
+  if (node->value)
+    L_OBJECT_CLEAR(node->value);
+  node->value = value;
+}
+
+
+
+/* lpt_node_get_value:
+ */
+LObject *lpt_node_get_value ( LptNode *node )
+{
+  return node->value;
 }

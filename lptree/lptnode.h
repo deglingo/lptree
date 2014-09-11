@@ -15,6 +15,9 @@
 struct _LptNode
 {
   LPT_NODE_INSTANCE_HEADER;
+
+  /* [REMOVEME] should go in NData */
+  LObject *value;
 };
 
 
@@ -33,6 +36,7 @@ LptNode *lpt_node_new ( LptNSpec *nspec,
                         LObject *key );
 void lpt_node_set_value ( LptNode *node,
                           LObject *value );
+LObject *lpt_node_get_value ( LptNode *node );
 
 
 
