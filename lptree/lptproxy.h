@@ -29,6 +29,10 @@ struct _LptProxyClass
 
 
 LptProxy *lpt_proxy_new ( LptTree *tree );
+void lpt_proxy_create_share ( LptProxy *proxy,
+                              const gchar *name,
+                              const gchar *path,
+                              gint flags );
 
 
 
