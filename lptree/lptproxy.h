@@ -33,6 +33,8 @@ void lpt_proxy_create_share ( LptProxy *proxy,
                               const gchar *name,
                               const gchar *path,
                               gint flags );
+void lpt_proxy_connect_client ( LptProxy *proxy,
+                                guint clid );
 
 
 

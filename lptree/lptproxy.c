@@ -25,3 +25,12 @@ void lpt_proxy_create_share ( LptProxy *proxy,
                               gint flags )
 {
 }
+
+
+
+/* lpt_proxy_connect_client:
+ */
+void lpt_proxy_connect_client ( LptProxy *proxy,
+                                guint clid )
+{
+}

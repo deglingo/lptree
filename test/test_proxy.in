@@ -26,3 +26,7 @@ test {
 test {
   lpt_proxy_create_share(data->proxy, "TESTSHARE", "/", 0);
 }
+
+test {
+  lpt_proxy_connect_client(data->proxy, 1);
+}
