@@ -31,6 +31,9 @@ struct _LptTreeClass
 
 
 LptTree *lpt_tree_new ( void );
+LptNode *lpt_tree_create_node ( LptTree *tree,
+                                const gchar *path,
+                                LptNSpec *nspec );
 
 
 

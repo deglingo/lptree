@@ -18,3 +18,16 @@ LptTree *lpt_tree_new ( void )
   l_object_unref(nspec);
   return tree;
 }
+
+
+
+/* lpt_tree_create_node:
+ */
+LptNode *lpt_tree_create_node ( LptTree *tree,
+                                const gchar *path,
+                                LptNSpec *nspec )
+{
+  LptNode *n;
+  n = lpt_node_new(nspec, NULL, NULL);
+  return n;
+}

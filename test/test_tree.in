@@ -13,3 +13,16 @@ test {
   PIF_CHECK(data->tree);
   PIF_CHECK(data->tree->root); /* ?? */
 }
+
+unit
+{
+  data { LptNSpec *nspec_int; }
+  setup { data->nspec_int = lpt_nspec_int_new("INT", -10, 10, 0); }
+  teardown { L_OBJECT_CLEAR(data->nspec_int); }
+
+  test /* create_node */ {
+    LptNode *node = lpt_tree_create_node(data->tree, "/node1", data->nspec_int);
+    PIF_CHECK(node);
+    L_OBJECT_CLEAR(node);
+  }
+}
