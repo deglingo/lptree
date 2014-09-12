@@ -1,0 +1,16 @@
+/* -*- c -*- */
+
+header {
+##include "lptree/lptree.h"
+}
+
+data { LptTree *tree; }
+
+setup { data->tree = lpt_tree_new(); }
+teardown { /* L_OBJECT_CLEAR(data->tree); */ }
+
+test { 
+  LptProxy *proxy = lpt_proxy_new(data->tree);
+  PIF_CHECK(proxy);
+  L_OBJECT_CLEAR(proxy);
+}

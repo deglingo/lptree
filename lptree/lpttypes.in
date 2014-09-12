@@ -7,4 +7,5 @@ namespace Lpt
   class NSpecDir : NSpec;
   class Node;
   class Tree;
+  class Proxy;
 }
