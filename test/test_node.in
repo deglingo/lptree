@@ -2,24 +2,29 @@
 
 header {
 ##include "lptree/lptnspecint.h"
+##include "lptree/lptnspecdir.h"
 ##include "lptree/lptnode.h"
 }
 
 unit /* node-int */
 {
   data {
-    LptNSpec *nspec;
+    LptNSpec *ns_int, *ns_dir;
     LptNode *node;
   }
 
   setup {
-    data->nspec = lpt_nspec_int_new("INT", -10, 10, 2);
-    data->node = lpt_node_new(data->nspec, NULL, NULL);
+    l_trash_push();
+    data->ns_int = L_TRASH_OBJECT
+      (lpt_nspec_int_new("INT", -10, 10, 2));
+    data->ns_dir = L_TRASH_OBJECT
+      (lpt_nspec_dir_new("DIR"));
+    data->node = lpt_node_new(data->ns_int, NULL, NULL);
   }
 
   teardown {
     L_OBJECT_CLEAR(data->node);
-    L_OBJECT_CLEAR(data->nspec);
+    l_trash_pop();
   }
 
   test { 
@@ -35,5 +40,15 @@ unit /* node-int */
     PIF_CHECK(L_IS_INT(val));
     PIF_CHECK(L_INT_VALUE(val) == 42);
     L_OBJECT_CLEAR(val);
+  }
+
+  test add
+  {
+    LptNode *ndir = lpt_node_new(data->ns_dir, NULL, NULL);
+    LptNode *nchild = lpt_node_new(data->ns_int, NULL, NULL);
+    LObject *key = L_TRASH_OBJECT(l_string_new("child1", -1));
+    lpt_node_add(ndir, nchild, key);
+    L_OBJECT_CLEAR(nchild);
+    L_OBJECT_CLEAR(ndir);
   }
 }

@@ -38,3 +38,13 @@ LObject *lpt_node_get_value ( LptNode *node )
 {
   return node->value;
 }
+
+
+
+/* lpt_node_add:
+ */
+void lpt_node_add ( LptNode *node,
+                    LptNode *child,
+                    LObject *key )
+{
+}

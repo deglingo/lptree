@@ -37,6 +37,9 @@ LptNode *lpt_node_new ( LptNSpec *nspec,
 void lpt_node_set_value ( LptNode *node,
                           LObject *value );
 LObject *lpt_node_get_value ( LptNode *node );
+void lpt_node_add ( LptNode *node,
+                    LptNode *child,
+                    LObject *key );
 
 
 
