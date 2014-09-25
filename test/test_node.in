@@ -19,7 +19,7 @@ unit /* node-int */
       (lpt_nspec_int_new("INT", -10, 10, 2));
     data->ns_dir = L_TRASH_OBJECT
       (lpt_nspec_dir_new("DIR"));
-    data->node = lpt_node_new(data->ns_int, NULL, NULL);
+    data->node = lpt_node_new(data->ns_int);
   }
 
   teardown {
@@ -44,8 +44,8 @@ unit /* node-int */
 
   test add
   {
-    LptNode *ndir = lpt_node_new(data->ns_dir, NULL, NULL);
-    LptNode *nchild = lpt_node_new(data->ns_int, NULL, NULL);
+    LptNode *ndir = lpt_node_new(data->ns_dir);
+    LptNode *nchild = lpt_node_new(data->ns_int);
     LObject *key = L_TRASH_OBJECT(l_string_new("child1", -1));
     lpt_node_add(ndir, nchild, key);
     L_OBJECT_CLEAR(nchild);

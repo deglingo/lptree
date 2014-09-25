@@ -27,7 +27,7 @@ LptTree *lpt_tree_new ( void )
   LptTree *tree;
   LptNSpec *nspec = lpt_nspec_dir_new("root");
   tree = LPT_TREE(l_object_new(LPT_CLASS_TREE, NULL));
-  tree->root = lpt_node_new(nspec, NULL, NULL);
+  tree->root = lpt_node_new(nspec);
   l_object_unref(nspec);
   return tree;
 }
@@ -52,6 +52,6 @@ LptNode *lpt_tree_create_node ( LptTree *tree,
                                 LptNSpec *nspec )
 {
   LptNode *n;
-  n = lpt_node_new(nspec, NULL, NULL);
+  n = lpt_node_new(nspec);
   return n;
 }
