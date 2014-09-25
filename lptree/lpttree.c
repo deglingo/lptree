@@ -7,6 +7,19 @@
 
 
 
+static void _dispose ( LObject *object );
+
+
+
+/* lpt_tree_class_init:
+ */
+static void lpt_tree_class_init ( LObjectClass *cls )
+{
+  cls->dispose = _dispose;
+}
+
+
+
 /* lpt_tree_new:
  */
 LptTree *lpt_tree_new ( void )
@@ -17,6 +30,17 @@ LptTree *lpt_tree_new ( void )
   tree->root = lpt_node_new(nspec, NULL, NULL);
   l_object_unref(nspec);
   return tree;
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
+  L_OBJECT_CLEAR(LPT_TREE(object)->root);
+  /* [FIXME] */
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 

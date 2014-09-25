@@ -2,10 +2,14 @@
 
 namespace Lpt
 {
-  class NSpec;
+  class NSpec {
+    void class_init ();
+  };
   class NSpecInt : NSpec;
   class NSpecDir : NSpec;
   class Node;
-  class Tree;
+  class Tree {
+    void class_init ();
+  };
   class Proxy;
 }

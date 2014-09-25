@@ -16,3 +16,7 @@ modules =
 cflags = -I@top_srcdir@ -I@top_builddir@ @PIFTEST_CFLAGS@ @LOS_CFLAGS@
 
 ldflags = -L@top_builddir@/lptree -llptree @PIFTEST_LIBS@ @LOS_LIBS@
+
+valgrind_supp_files =
+  @LOS_VGSUPPDIR@/glib.supp
+  @LOS_VGSUPPDIR@/los.supp

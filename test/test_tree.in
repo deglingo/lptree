@@ -7,7 +7,7 @@ header {
 data { LptTree *tree; }
 
 setup { data->tree = lpt_tree_new(); }
-teardown { /* L_OBJECT_CLEAR(data->tree); */ }
+teardown { L_OBJECT_CLEAR(data->tree); }
 
 test { 
   PIF_CHECK(data->tree);
