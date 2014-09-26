@@ -1,6 +1,7 @@
 /* lptnode.c -
  */
 
+#include "lptree/private.h"
 #include "lptree/lptnode.h"
 #include "lptree/lptnode.inl"
 
@@ -72,7 +73,7 @@ void lpt_node_add ( LptNode *node,
                     LptNode *child,
                     LObject *key )
 {
-  /* ASSERT(L_IS_STRING(key)); */
+  ASSERT(L_IS_STRING(key));
   child->key = l_object_ref(key);
   node->children = g_list_append(node->children,
                                  l_object_ref(child));
@@ -86,7 +87,7 @@ LptNode *lpt_node_get_child ( LptNode *node,
                               LObject *key )
 {
   GList *l;
-  /* ASSERT(L_IS_STRING(key)); */
+  ASSERT(L_IS_STRING(key));
   for (l = node->children; l; l = l->next)
     {
       if (!strcmp(L_STRING(key)->str, L_STRING(LPT_NODE(l->data)->key)->str))

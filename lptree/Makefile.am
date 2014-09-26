@@ -13,7 +13,7 @@ includelptree_HEADERS = \
 
 lib_LTLIBRARIES = liblptree.la
 
-liblptree_la_CFLAGS = -I$(top_srcdir) -I$(top_builddir) @LOS_CFLAGS@
+liblptree_la_CFLAGS = -DCL_LOG_DOMAIN=\"lptree\" -I$(top_srcdir) -I$(top_builddir) @LOS_CFLAGS@
 
 liblptree_la_SOURCES = \
 	lptnspec.c \
