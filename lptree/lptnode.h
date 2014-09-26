@@ -16,6 +16,7 @@ struct _LptNode
 {
   LPT_NODE_INSTANCE_HEADER;
 
+  LObject *key;
   /* [REMOVEME] should go in NData */
   GList *children;
   LObject *value;

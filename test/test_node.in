@@ -45,11 +45,16 @@ unit /* node-int */
   test add
   {
     LptNode *ndir = lpt_node_new(data->ns_dir);
-    LptNode *nchild = lpt_node_new(data->ns_int);
-    LObject *key = L_TRASH_OBJECT(l_string_new("child1", -1));
-    lpt_node_add(ndir, nchild, key);
-    PIF_CHECK_EQ_PTR(lpt_node_get_child(ndir, key), nchild);
-    L_OBJECT_CLEAR(nchild);
+    LptNode *nchild1 = lpt_node_new(data->ns_int);
+    LptNode *nchild2 = lpt_node_new(data->ns_int);
+    LObject *key1 = L_TRASH_OBJECT(l_string_new("child1", -1));
+    LObject *key2 = L_TRASH_OBJECT(l_string_new("child2", -1));
+    lpt_node_add(ndir, nchild1, key1);
+    lpt_node_add(ndir, nchild2, key2);
+    PIF_CHECK_EQ_PTR(lpt_node_get_child(ndir, key1), nchild1);
+    PIF_CHECK_EQ_PTR(lpt_node_get_child(ndir, key2), nchild2);
+    L_OBJECT_CLEAR(nchild1);
+    L_OBJECT_CLEAR(nchild2);
     L_OBJECT_CLEAR(ndir);
   }
 }

@@ -4,6 +4,8 @@
 #include "lptree/lptnode.h"
 #include "lptree/lptnode.inl"
 
+#include <string.h> /* [removeme] */
+
 
 
 static void _dispose ( LObject *object );
@@ -34,6 +36,7 @@ LptNode *lpt_node_new ( LptNSpec *nspec )
  */
 static void _dispose ( LObject *object )
 {
+  L_OBJECT_CLEAR(LPT_NODE(object)->key);
   g_list_free_full(LPT_NODE(object)->children, l_object_unref);
   LPT_NODE(object)->children = NULL;
   ((LObjectClass *) parent_class)->dispose(object);
@@ -69,6 +72,8 @@ void lpt_node_add ( LptNode *node,
                     LptNode *child,
                     LObject *key )
 {
+  /* ASSERT(L_IS_STRING(key)); */
+  child->key = l_object_ref(key);
   node->children = g_list_append(node->children,
                                  l_object_ref(child));
 }
@@ -80,8 +85,12 @@ void lpt_node_add ( LptNode *node,
 LptNode *lpt_node_get_child ( LptNode *node,
                               LObject *key )
 {
-  if (node->children)
-    return LPT_NODE(node->children->data);
-  else
-    return NULL;
+  GList *l;
+  /* ASSERT(L_IS_STRING(key)); */
+  for (l = node->children; l; l = l->next)
+    {
+      if (!strcmp(L_STRING(key)->str, L_STRING(LPT_NODE(l->data)->key)->str))
+        return LPT_NODE(l->data);
+    }
+  return NULL;
 }
