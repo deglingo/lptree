@@ -6,6 +6,19 @@
 
 
 
+static void _dispose ( LObject *object );
+
+
+
+/* lpt_node_class_init:
+ */
+static void lpt_node_class_init ( LObjectClass *cls )
+{
+  cls->dispose = _dispose;
+}
+
+
+
 /* lpt_node_new:
  */
 LptNode *lpt_node_new ( LptNSpec *nspec )
@@ -13,6 +26,17 @@ LptNode *lpt_node_new ( LptNSpec *nspec )
   LptNode *node;
   node = LPT_NODE(l_object_new(LPT_CLASS_NODE, NULL));
   return node;
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
+  g_list_free_full(LPT_NODE(object)->children, l_object_unref);
+  LPT_NODE(object)->children = NULL;
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 
@@ -45,4 +69,19 @@ void lpt_node_add ( LptNode *node,
                     LptNode *child,
                     LObject *key )
 {
+  node->children = g_list_append(node->children,
+                                 l_object_ref(child));
+}
+
+
+
+/* lpt_node_get_child:
+ */
+LptNode *lpt_node_get_child ( LptNode *node,
+                              LObject *key )
+{
+  if (node->children)
+    return LPT_NODE(node->children->data);
+  else
+    return NULL;
 }
