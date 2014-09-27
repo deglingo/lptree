@@ -6,6 +6,7 @@ suite = lptree-test
 
 modules =
   test_base
+  test_path
   test_tree
   test_nspec
   test_nspecint

@@ -4,6 +4,7 @@ include_HEADERS = lptree.h
 
 includelptree_HEADERS = \
 	lptbase.h \
+	lptpath.h \
 	lptnspec.h lptnspec-def.h \
 	lptnspecdir.h lptnspecdir-def.h \
 	lptnspecint.h lptnspecint-def.h \
@@ -16,6 +17,7 @@ lib_LTLIBRARIES = liblptree.la
 liblptree_la_CFLAGS = -DCL_LOG_DOMAIN=\"lptree\" -I$(top_srcdir) -I$(top_builddir) @LOS_CFLAGS@
 
 liblptree_la_SOURCES = \
+	lptpath.c \
 	lptnspec.c \
 	lptnspecdir.c \
 	lptnspecint.c \

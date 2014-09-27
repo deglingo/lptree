@@ -1,0 +1,26 @@
+/* -*- c -*- */
+
+header
+{
+##include "lptree/lptpath.h"
+}
+
+test
+{
+  const gchar *path = "/comp1/comp2";
+  LObject *key;
+  /* comp1 */
+  key = lpt_path_next_key(&path);
+  PIF_CHECK(key);
+  PIF_CHECK(L_IS_STRING(key));
+  PIF_CHECK_EQ_STR(L_STRING(key)->str, "comp1");
+  l_object_unref(key);
+  /* comp2 */
+  key = lpt_path_next_key(&path);
+  PIF_CHECK(key);
+  PIF_CHECK(L_IS_STRING(key));
+  PIF_CHECK_EQ_STR(L_STRING(key)->str, "comp2");
+  l_object_unref(key);
+  /* end */
+  PIF_CHECK(!lpt_path_next_key(&path));
+}
