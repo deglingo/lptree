@@ -4,25 +4,46 @@ header {
 ##include "lptree/lptree.h"
 }
 
-data { LptTree *tree; }
+data
+{
+  LptTree *tree;
+}
 
-setup { data->tree = lpt_tree_new(); }
-teardown { L_OBJECT_CLEAR(data->tree); }
+setup
+{
+  l_trash_push();
+  data->tree = L_TRASH_OBJECT(lpt_tree_new());
+}
 
-test { 
+teardown
+{
+  l_trash_pop();
+}
+
+test new
+{ 
   PIF_CHECK(data->tree);
   PIF_CHECK(data->tree->root); /* ?? */
 }
 
 unit
 {
-  data { LptNSpec *nspec_int; }
-  setup { data->nspec_int = lpt_nspec_int_new("INT", -10, 10, 0); }
-  teardown { L_OBJECT_CLEAR(data->nspec_int); }
+  data
+    {
+      LptNSpec *nspec_int;
+    }
+  
+  setup
+    {
+      data->nspec_int = L_TRASH_OBJECT
+        (lpt_nspec_int_new("INT", -10, 10, 0));
+    }
 
-  test /* create_node */ {
+  test create_get_node
+  {
     LptNode *node = lpt_tree_create_node(data->tree, "/node1", data->nspec_int);
     PIF_CHECK(node);
+    /* [REMOVEME] */
     L_OBJECT_CLEAR(node);
   }
 }
