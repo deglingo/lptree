@@ -34,6 +34,8 @@ LptTree *lpt_tree_new ( void );
 LptNode *lpt_tree_create_node ( LptTree *tree,
                                 const gchar *path,
                                 LptNSpec *nspec );
+LptNode *lpt_tree_get_node ( LptTree *tree,
+                             const gchar *path );
 
 
 

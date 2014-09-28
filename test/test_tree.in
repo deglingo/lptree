@@ -30,20 +30,46 @@ unit
 {
   data
     {
+      LptNSpec *nspec_dir;
       LptNSpec *nspec_int;
     }
   
   setup
     {
+      data->nspec_dir = L_TRASH_OBJECT
+        (lpt_nspec_dir_new("DIR"));
       data->nspec_int = L_TRASH_OBJECT
         (lpt_nspec_int_new("INT", -10, 10, 0));
     }
 
   test create_get_node
   {
-    LptNode *node = lpt_tree_create_node(data->tree, "/node1", data->nspec_int);
-    PIF_CHECK(node);
-    /* [REMOVEME] */
-    L_OBJECT_CLEAR(node);
+    LptNode *n_a, *n_b, *n_aa, *n_ab, *n_ba, *n_bb;
+    /* create the tree */
+    PIF_CHECK
+      (n_a = lpt_tree_create_node(data->tree, "/a", data->nspec_dir));
+    PIF_CHECK
+      (n_aa = lpt_tree_create_node(data->tree, "/a/a", data->nspec_int));
+    PIF_CHECK
+      (n_ab = lpt_tree_create_node(data->tree, "/a/b", data->nspec_int));
+    PIF_CHECK
+      (n_b = lpt_tree_create_node(data->tree, "/b", data->nspec_dir));
+    PIF_CHECK
+      (n_ba = lpt_tree_create_node(data->tree, "/b/a", data->nspec_int));
+    PIF_CHECK
+      (n_bb = lpt_tree_create_node(data->tree, "/b/b", data->nspec_int));
+    /* check get_node() */
+    PIF_CHECK_EQ_PTR
+      (lpt_tree_get_node(data->tree, "/a"), n_a);
+    PIF_CHECK_EQ_PTR
+      (lpt_tree_get_node(data->tree, "/a/a"), n_aa);
+    PIF_CHECK_EQ_PTR
+      (lpt_tree_get_node(data->tree, "/a/b"), n_ab);
+    PIF_CHECK_EQ_PTR
+      (lpt_tree_get_node(data->tree, "/b"), n_b);
+    PIF_CHECK_EQ_PTR
+      (lpt_tree_get_node(data->tree, "/b/a"), n_ba);
+    PIF_CHECK_EQ_PTR
+      (lpt_tree_get_node(data->tree, "/b/b"), n_bb);
   }
 }
