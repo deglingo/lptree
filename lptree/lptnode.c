@@ -81,6 +81,15 @@ void lpt_node_add ( LptNode *node,
 
 
 
+/* lpt_node_get_n_children:
+ */
+guint lpt_node_get_n_children ( LptNode *node )
+{
+  return g_list_length(node->children);
+}
+
+
+
 /* lpt_node_get_child:
  */
 LptNode *lpt_node_get_child ( LptNode *node,
