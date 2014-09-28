@@ -5,10 +5,55 @@ header
 ##include "lptree/lptree.h"
 }
 
+header
+{
+  static GHashTable *client_map_new ( void )
+  {
+    return g_hash_table_new(NULL, NULL);
+  }
+
+  static void client_map_free ( GHashTable *cmap )
+  {
+    g_hash_table_unref(cmap);
+  }
+
+  static void client_map_add ( GHashTable *cmap,
+                               guint clid,
+                               LptProxy *client )
+  {
+    g_hash_table_insert(cmap, GUINT_TO_POINTER(clid), client);
+  }
+
+  static LptProxy *client_map_get ( GHashTable *client_map,
+                                    guint clid )
+  {
+    gpointer client = g_hash_table_lookup(client_map, GUINT_TO_POINTER(clid));
+    if (!client) {
+      fprintf(stderr, "\nERROR: client not found: %d\n", clid);
+      abort();
+    }
+    return LPT_PROXY(client);
+  }
+}
+
+header
+{
+  static void proxy_handler ( LptProxy *proxy,
+                              guint clid,
+                              LObject *msg,
+                              gpointer data )
+  {
+    GHashTable *cmap = data;
+    LptProxy *dest = client_map_get(cmap, clid);
+    lpt_proxy_handle_message(dest, msg);
+  }
+}
+
 data
 { 
   LptTree *tree;
   LptProxy *proxy;
+  GHashTable *client_map;
 }
 
 setup
@@ -16,8 +61,10 @@ setup
   l_trash_push();
   data->tree = L_TRASH_OBJECT
     (lpt_tree_new());
+  data->client_map = l_trash_add
+    (client_map_new(), (LTrashFunc) client_map_free);
   data->proxy = L_TRASH_OBJECT
-    (lpt_proxy_new(data->tree, NULL, NULL));
+    (lpt_proxy_new(data->tree, proxy_handler, data->client_map));
 }
 
 teardown
@@ -52,51 +99,6 @@ header
     lpt_tree_create_node(tree, "/share1/node1", ns_int);
   }
 }
-
-header
-{
-  static GHashTable *client_map_new ( void )
-  {
-    return g_hash_table_new(NULL, NULL);
-  }
-
-  static void client_map_free ( GHashTable *cmap )
-  {
-    g_hash_table_unref(cmap);
-  }
-
-  static void client_map_add ( GHashTable *cmap,
-                               guint clid,
-                               LptProxy *client )
-  {
-    g_hash_table_insert(cmap, GUINT_TO_POINTER(clid), client);
-  }
-
-  static LptProxy *client_map_get ( GHashTable *client_map,
-                                    guint clid )
-  {
-    gpointer client = g_hash_table_lookup(client_map, GUINT_TO_POINTER(clid));
-    if (!client) {
-      fprintf(stderr, "\nERROR: client not found: %d\n", clid);
-      abort();
-    }
-    return LPT_PROXY(client);
-  }
-}
-
-header
-{
-  static void client_handler ( LptProxy *proxy,
-                               guint clid,
-                               LObject *msg,
-                               gpointer data )
-  {
-    GHashTable *cmap = data;
-    LptProxy *dest = client_map_get(cmap, clid);
-    lpt_proxy_handle_message(dest, msg);
-  }
-}
-
 test complete
 {
   LptTree *client_tree;
@@ -110,7 +112,8 @@ test complete
   client_map_add(client_map, 1, data->proxy);
   /* setup the client side */
   client_tree = L_TRASH_OBJECT(lpt_tree_new());
-  client_proxy = L_TRASH_OBJECT(lpt_proxy_new(client_tree, client_handler, client_map));
+  client_proxy = L_TRASH_OBJECT(lpt_proxy_new(client_tree, proxy_handler, client_map));
+  client_map_add(data->client_map, 1, client_proxy);
   lpt_proxy_connect_client(client_proxy, 1);
   lpt_proxy_connect_share(client_proxy, 1, "SHARE1", "/dest-share1", 0);
   /* /\* check *\/ */
