@@ -39,3 +39,31 @@ test connect_client
 {
   lpt_proxy_connect_client(data->proxy, 1);
 }
+
+header
+{
+  static void setup_test_tree ( LptTree *tree )
+  {
+    LptNSpec *ns_dir = L_TRASH_OBJECT
+      (lpt_nspec_dir_new("DIR"));
+    LptNSpec *ns_int = L_TRASH_OBJECT
+      (lpt_nspec_int_new("INT", 0, 10, 0));
+    lpt_tree_create_node(tree, "/share1", ns_dir);
+    lpt_tree_create_node(tree, "/share1/node1", ns_int);
+  }
+}
+
+test complete
+{
+  LptTree *client_tree;
+  LptProxy *client_proxy;
+  /* setup the server side */
+  setup_test_tree(data->tree);
+  lpt_proxy_create_share(data->proxy, "SHARE1", "/share1", 0);
+  lpt_proxy_connect_client(data->proxy, 1);
+  /* setup the client side */
+  client_tree = L_TRASH_OBJECT(lpt_tree_new());
+  client_proxy = L_TRASH_OBJECT(lpt_proxy_new(client_tree));
+  lpt_proxy_connect_client(client_proxy, 1);
+  lpt_proxy_connect_share(client_proxy, 1, "SHARE1", "/dest-share1", 0);
+}

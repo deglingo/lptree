@@ -34,3 +34,15 @@ void lpt_proxy_connect_client ( LptProxy *proxy,
                                 guint clid )
 {
 }
+
+
+
+/* lpt_proxy_connect_share:
+ */
+void lpt_proxy_connect_share ( LptProxy *proxy,
+                               guint clid,
+                               const gchar *share_name,
+                               const gchar *dest_path,
+                               gint flags )
+{
+}
