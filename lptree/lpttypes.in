@@ -13,5 +13,7 @@ namespace Lpt
   class Tree {
     void class_init ();
   };
-  class Proxy;
+  class Proxy {
+    void class_init ();
+  };
 }

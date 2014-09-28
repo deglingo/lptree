@@ -23,6 +23,7 @@ struct _LptProxy
 {
   LPT_PROXY_INSTANCE_HEADER;
 
+  LptTree *tree;
   LptProxyHandler handler;
   gpointer handler_data;
 };

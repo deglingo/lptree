@@ -5,6 +5,22 @@
 #include "lptree/lptproxy.h"
 #include "lptree/lptproxy.inl"
 
+/* [FIXME] */
+#include "lptree/lptnspecdir.h"
+
+
+
+static void _dispose ( LObject *object );
+
+
+
+/* lpt_proxy_class_init:
+ */
+static void lpt_proxy_class_init ( LObjectClass *cls )
+{
+  cls->dispose = _dispose;
+}
+
 
 
 /* lpt_proxy_new:
@@ -15,9 +31,20 @@ LptProxy *lpt_proxy_new ( LptTree *tree,
 {
   LptProxy *proxy;
   proxy = LPT_PROXY(l_object_new(LPT_CLASS_PROXY, NULL));
+  proxy->tree = l_object_ref(tree);
   proxy->handler = handler;
   proxy->handler_data = handler_data;
   return proxy;
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
+  L_OBJECT_CLEAR(LPT_PROXY(object)->tree);
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 
@@ -42,6 +69,13 @@ void lpt_proxy_handle_message ( LptProxy *proxy,
         LTuple *answer = l_tuple_newl_give(2, l_int_new(2), l_int_new(clid), NULL);
         proxy->handler(proxy, clid, L_OBJECT(answer), proxy->handler_data);
         l_object_unref(answer);
+      }
+      break;
+    case 2:
+      {
+        LptNSpec *ns = lpt_nspec_dir_new("DIR");
+        lpt_tree_create_node(proxy->tree, "/dest-share1", ns);
+        l_object_unref(ns);
       }
       break;
     default:
