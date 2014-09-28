@@ -107,6 +107,9 @@ void lpt_proxy_handle_message ( LptProxy *proxy,
 {
   LObject *key;
   LInt *clid;
+  /* CL_DEBUG("proxy_message(%s, %s)", */
+  /*          l_object_to_string(L_OBJECT(proxy)), */
+  /*          l_object_to_string(L_OBJECT(msg))); */
   ASSERT(L_IS_TUPLE(msg));
   ASSERT(L_TUPLE_SIZE(msg) >= 2);
   /* get key */
