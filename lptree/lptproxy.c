@@ -34,7 +34,10 @@ static LInt *lpt_proxy_message_ref ( LptProxyMessage msg )
 typedef struct _Share
   {
     guint shareid;
-    gchar *dest_path;
+    gboolean owned;
+    gchar *name;
+    gchar *path;
+    LptNode *root;
   }
   Share;
 
@@ -61,7 +64,8 @@ static Share *share_new ( void )
  */
 static void share_free ( Share *share )
 {
-  g_free(share->dest_path);
+  g_free(share->path);
+  g_free(share->name);
   g_free(share);
 }
 
@@ -93,6 +97,7 @@ LptProxy *lpt_proxy_new ( LptTree *tree,
   proxy->shares = g_hash_table_new_full(NULL, NULL,
                                         NULL,
                                         (GDestroyNotify) share_free);
+  proxy->shares_by_name = g_hash_table_new(g_str_hash, g_str_equal);
   return proxy;
 }
 
@@ -107,8 +112,59 @@ static void _dispose ( LObject *object )
     g_hash_table_unref(proxy->shares);
     proxy->shares = NULL;
   }
+  if (proxy->shares_by_name) {
+    g_hash_table_unref(proxy->shares_by_name);
+    proxy->shares_by_name = NULL;
+  }
   L_OBJECT_CLEAR(proxy->tree);
   ((LObjectClass *) parent_class)->dispose(object);
+}
+
+
+
+struct ntree_child_data
+{
+  LptProxy *proxy;
+  LTuple *children;
+  guint n_child;
+};
+
+static LTuple *_get_ntree ( LptProxy *proxy,
+                            LptNode *node );
+
+
+
+/* _get_ntree_child:
+ */
+static void _get_ntree_child ( LptNode *node,
+                                  gpointer data_ )
+{
+  struct ntree_child_data *data = data_;
+  l_tuple_give_item(data->children, data->n_child++,
+                    L_OBJECT(_get_ntree(data->proxy, node)));
+}
+
+
+
+/* _get_ntree:
+ */
+static LTuple *_get_ntree ( LptProxy *proxy,
+                            LptNode *node )
+{
+  /* node tuple: (nid, nspecid, key, children) */ 
+  LTuple *ntree = l_tuple_new(4);
+  LTuple *children;
+  struct ntree_child_data data;
+  l_tuple_give_item(ntree, 0, L_OBJECT(l_int_new(0))); /* [fixme] */
+  l_tuple_give_item(ntree, 1, L_OBJECT(l_int_new(0))); /* [fixme] */
+  l_tuple_give_item(ntree, 2, l_object_ref(node->key));
+  children = l_tuple_new(lpt_node_get_n_children(node));
+  data.proxy = proxy;
+  data.children = children;
+  data.n_child = 0;
+  lpt_node_foreach(node, _get_ntree_child, &data);
+  l_tuple_give_item(ntree, 3, L_OBJECT(children));
+  return ntree;
 }
 
 
@@ -119,18 +175,55 @@ static void _handle_request_connect ( LptProxy *proxy,
                                       LInt *clid,
                                       LObject *msg )
 {
-  LTuple *answer;
-  LObject *shareid;
-  ASSERT(L_TUPLE_SIZE(msg) == 3);
+  LTuple *answer, *ntree;
+  LObject *shareid, *name;
+  Share *share;
+  ASSERT(L_TUPLE_SIZE(msg) == 4);
   shareid = L_TUPLE_ITEM(msg, 2);
   ASSERT(L_IS_INT(shareid));
-  answer = l_tuple_newl_give(3,
+  name = L_TUPLE_ITEM(msg, 3);
+  ASSERT(L_IS_STRING(name));
+  share = g_hash_table_lookup(proxy->shares_by_name, L_STRING(name)->str);
+  ASSERT(share);
+  ntree = _get_ntree(proxy, share->root);
+  answer = l_tuple_newl_give(4,
                              lpt_proxy_message_ref(LPT_PROXY_MESSAGE_CONFIRM_CONNECT),
                              l_object_ref(clid),
                              l_object_ref(shareid),
+                             ntree,
                              NULL);
   proxy->handler(proxy, L_INT_VALUE(clid), L_OBJECT(answer), proxy->handler_data);
   l_object_unref(answer);
+}
+
+
+
+/* _create_ntree:
+ */
+static void _create_ntree ( LptProxy *proxy,
+                            Share *share,
+                            LTuple *ntree,
+                            LptNode *base )
+{
+  LptNSpec *nspec = lpt_nspec_dir_new("DIR");
+  guint c;
+  LTuple *children;
+  if (!base)
+    {
+      base = lpt_tree_create_node(proxy->tree, share->path, nspec);
+    }
+  else
+    {
+      LObject *key = L_TUPLE_ITEM(ntree, 2);
+      LptNode *node = lpt_node_new(nspec);
+      lpt_node_add(base, node, key);
+      base = node;
+      l_object_unref(node);
+    }
+  l_object_unref(nspec);
+  children = L_TUPLE(L_TUPLE_ITEM(ntree, 3));
+  for (c = 0; c < L_TUPLE_SIZE(children); c++)
+    _create_ntree(proxy, share, L_TUPLE(L_TUPLE_ITEM(children, c)), base);
 }
 
 
@@ -142,14 +235,16 @@ static void _handle_confirm_connect ( LptProxy *proxy,
                                       LObject *msg )
 {
   LptNSpec *ns = lpt_nspec_dir_new("DIR");
-  LObject *shareid;
+  LObject *shareid, *ntree;
   Share *share;
-  ASSERT(L_TUPLE_SIZE(msg) == 3);
+  ASSERT(L_TUPLE_SIZE(msg) == 4);
   shareid = L_TUPLE_ITEM(msg, 2);
   ASSERT(L_IS_INT(shareid));
+  ntree = L_TUPLE_ITEM(msg, 3);
+  ASSERT(L_IS_TUPLE(ntree));
   share = g_hash_table_lookup(proxy->shares, GUINT_TO_POINTER(L_INT_VALUE(shareid)));
   ASSERT(share);
-  lpt_tree_create_node(proxy->tree, share->dest_path, ns);
+  _create_ntree(proxy, share, L_TUPLE(ntree), NULL);
   l_object_unref(ns);
 }
 
@@ -195,6 +290,14 @@ void lpt_proxy_create_share ( LptProxy *proxy,
                               const gchar *path,
                               gint flags )
 {
+  Share *share = share_new();
+  share->name = g_strdup(name);
+  share->path = g_strdup(path);
+  share->owned = TRUE;
+  share->root = lpt_tree_get_node(proxy->tree, path);
+  ASSERT(share->root);
+  g_hash_table_insert(proxy->shares, GUINT_TO_POINTER(share->shareid), share);
+  g_hash_table_insert(proxy->shares_by_name, share->name, share);
 }
 
 
@@ -219,12 +322,15 @@ void lpt_proxy_connect_share ( LptProxy *proxy,
   Share *share;
   LTuple *msg;
   share = share_new();
-  share->dest_path = g_strdup(dest_path);
+  share->owned = FALSE;
+  share->name = g_strdup(share_name); /* ?? */
+  share->path = g_strdup(dest_path);
   g_hash_table_insert(proxy->shares, GUINT_TO_POINTER(share->shareid), share);
-  msg = l_tuple_newl_give(3,
+  msg = l_tuple_newl_give(4,
                           lpt_proxy_message_ref(LPT_PROXY_MESSAGE_REQUEST_CONNECT),
                           l_int_new(clid),
                           l_int_new(share->shareid),
+                          l_string_new(share_name),
                           NULL);
   proxy->handler(proxy, clid, L_OBJECT(msg), proxy->handler_data);
   l_object_unref(msg);

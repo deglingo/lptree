@@ -122,5 +122,7 @@ test complete
   lpt_proxy_connect_share(client_proxy, 1, "SHARE2", "/dest-share2", 0);
   /* /\* check *\/ */
   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share1"));
+  PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share1/node1"));
   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2"));
+  PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2/node1"));
 }
