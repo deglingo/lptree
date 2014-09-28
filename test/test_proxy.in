@@ -17,7 +17,7 @@ setup
   data->tree = L_TRASH_OBJECT
     (lpt_tree_new());
   data->proxy = L_TRASH_OBJECT
-    (lpt_proxy_new(data->tree));
+    (lpt_proxy_new(data->tree, NULL, NULL));
 }
 
 teardown
@@ -53,6 +53,44 @@ header
   }
 }
 
+/* header */
+/* { */
+/*   static GHashTable *client_map_new ( void ) */
+/*   { */
+/*     return g_hash_table_new(NULL, NULL); */
+/*   } */
+
+/*   static void client_map_add ( GHashTable *cmap, */
+/*                                guint clid, */
+/*                                LptProxy *client ) */
+/*   { */
+/*     g_hash_table_insert(cmap, GUINT_TO_POINTER(clid), client); */
+/*   } */
+
+/*   static LptProxy *client_map_lookup ( GHashTable *client_map, */
+/*                                        guint clid ) */
+/*   { */
+/*     gpointer client = g_hash_table_lookup(client_map, GUINT_TO_POINTER(clid)); */
+/*     if (!client) { */
+/*       fprintf(stderr, "\nERROR: client not found: %d\n", clid); */
+/*       abort(); */
+/*     } */
+/*     return LPT_PROXY(client); */
+/*   } */
+/* } */
+
+header
+{
+  static void client_handler ( LptProxy *proxy,
+                               guint clid,
+                               LObject *msg,
+                               gpointer data )
+  {
+    fprintf(stderr, "\n[TODO] handle_message: %s\n",
+            (gchar *)L_TRASH_GPOINTER(l_object_to_string(msg)));
+  }
+}
+
 test complete
 {
   LptTree *client_tree;
@@ -63,7 +101,9 @@ test complete
   lpt_proxy_connect_client(data->proxy, 1);
   /* setup the client side */
   client_tree = L_TRASH_OBJECT(lpt_tree_new());
-  client_proxy = L_TRASH_OBJECT(lpt_proxy_new(client_tree));
+  client_proxy = L_TRASH_OBJECT(lpt_proxy_new(client_tree, client_handler, NULL));
   lpt_proxy_connect_client(client_proxy, 1);
   lpt_proxy_connect_share(client_proxy, 1, "SHARE1", "/dest-share1", 0);
+  /* /\* check *\/ */
+  /* PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share1")); */
 }

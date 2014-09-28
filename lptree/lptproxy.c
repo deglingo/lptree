@@ -8,10 +8,14 @@
 
 /* lpt_proxy_new:
  */
-LptProxy *lpt_proxy_new ( LptTree *tree )
+LptProxy *lpt_proxy_new ( LptTree *tree,
+                          LptProxyHandler handler,
+                          gpointer handler_data )
 {
   LptProxy *proxy;
   proxy = LPT_PROXY(l_object_new(LPT_CLASS_PROXY, NULL));
+  proxy->handler = handler;
+  proxy->handler_data = handler_data;
   return proxy;
 }
 
@@ -45,4 +49,8 @@ void lpt_proxy_connect_share ( LptProxy *proxy,
                                const gchar *dest_path,
                                gint flags )
 {
+  LTuple *msg;
+  msg = l_tuple_newl_give(1, l_int_new(1), NULL);
+  proxy->handler(proxy, clid, L_OBJECT(msg), proxy->handler_data);
+  l_object_unref(msg);
 }

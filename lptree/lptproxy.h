@@ -10,11 +10,21 @@
 
 
 
+typedef void (* LptProxyHandler) ( LptProxy *proxy,
+                                   guint clid,
+                                   LObject *msg,
+                                   gpointer data );
+
+
+
 /* LptProxy:
  */
 struct _LptProxy
 {
   LPT_PROXY_INSTANCE_HEADER;
+
+  LptProxyHandler handler;
+  gpointer handler_data;
 };
 
 
@@ -28,7 +38,9 @@ struct _LptProxyClass
 
 
 
-LptProxy *lpt_proxy_new ( LptTree *tree );
+LptProxy *lpt_proxy_new ( LptTree *tree,
+                          LptProxyHandler handler,
+                          gpointer handler_data );
 void lpt_proxy_create_share ( LptProxy *proxy,
                               const gchar *name,
                               const gchar *path,
