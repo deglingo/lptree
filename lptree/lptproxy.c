@@ -1,6 +1,7 @@
 /* lptproxy.c -
  */
 
+#include "lptree/private.h"
 #include "lptree/lptproxy.h"
 #include "lptree/lptproxy.inl"
 
@@ -17,6 +18,18 @@ LptProxy *lpt_proxy_new ( LptTree *tree,
   proxy->handler = handler;
   proxy->handler_data = handler_data;
   return proxy;
+}
+
+
+
+/* lpt_proxy_handle_message:
+ */
+void lpt_proxy_handle_message ( LptProxy *proxy,
+                                LObject *msg )
+{
+  gchar *str = l_object_to_string(msg);
+  CL_DEBUG("[TODO] message: %s", str);
+  g_free(str);
 }
 
 

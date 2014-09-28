@@ -41,6 +41,8 @@ struct _LptProxyClass
 LptProxy *lpt_proxy_new ( LptTree *tree,
                           LptProxyHandler handler,
                           gpointer handler_data );
+void lpt_proxy_handle_message ( LptProxy *proxy,
+                                LObject *msg );
 void lpt_proxy_create_share ( LptProxy *proxy,
                               const gchar *name,
                               const gchar *path,
