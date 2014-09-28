@@ -97,6 +97,8 @@ header
       (lpt_nspec_int_new("INT", 0, 10, 0));
     lpt_tree_create_node(tree, "/share1", ns_dir);
     lpt_tree_create_node(tree, "/share1/node1", ns_int);
+    lpt_tree_create_node(tree, "/share2", ns_dir);
+    lpt_tree_create_node(tree, "/share2/node1", ns_int);
   }
 }
 test complete
@@ -108,6 +110,7 @@ test complete
   /* setup the server side */
   setup_test_tree(data->tree);
   lpt_proxy_create_share(data->proxy, "SHARE1", "/share1", 0);
+  lpt_proxy_create_share(data->proxy, "SHARE2", "/share2", 0);
   lpt_proxy_connect_client(data->proxy, 1);
   client_map_add(client_map, 1, data->proxy);
   /* setup the client side */
@@ -116,6 +119,8 @@ test complete
   client_map_add(data->client_map, 1, client_proxy);
   lpt_proxy_connect_client(client_proxy, 1);
   lpt_proxy_connect_share(client_proxy, 1, "SHARE1", "/dest-share1", 0);
+  lpt_proxy_connect_share(client_proxy, 1, "SHARE2", "/dest-share2", 0);
   /* /\* check *\/ */
   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share1"));
+  PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2"));
 }

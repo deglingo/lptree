@@ -26,6 +26,7 @@ struct _LptProxy
   LptTree *tree;
   LptProxyHandler handler;
   gpointer handler_data;
+  GHashTable *shares; /* map <shareid, Share> */
 };
 
 
