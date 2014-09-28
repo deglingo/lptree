@@ -1,32 +1,41 @@
 /* -*- c -*- */
 
-header {
+header
+{
 ##include "lptree/lptree.h"
 }
 
-data { 
+data
+{ 
   LptTree *tree;
   LptProxy *proxy;
 }
 
-setup { 
-  data->tree = lpt_tree_new();
-  data->proxy = lpt_proxy_new(data->tree);
+setup
+{
+  l_trash_push();
+  data->tree = L_TRASH_OBJECT
+    (lpt_tree_new());
+  data->proxy = L_TRASH_OBJECT
+    (lpt_proxy_new(data->tree));
 }
 
-teardown {
-  L_OBJECT_CLEAR(data->proxy);
-  L_OBJECT_CLEAR(data->tree);
+teardown
+{
+  l_trash_pop();
 }
 
-test { 
+test new
+{ 
   PIF_CHECK(data->proxy);
 }
 
-test {
+test create_share
+{
   lpt_proxy_create_share(data->proxy, "TESTSHARE", "/", 0);
 }
 
-test {
+test connect_client
+{
   lpt_proxy_connect_client(data->proxy, 1);
 }
