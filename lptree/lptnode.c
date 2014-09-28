@@ -104,3 +104,18 @@ LptNode *lpt_node_get_child ( LptNode *node,
     }
   return NULL;
 }
+
+
+
+/* lpt_node_foreach:
+ */
+void lpt_node_foreach ( LptNode *node,
+                        LptForeachFunc func,
+                        gpointer data )
+{
+  GList *l;
+  for (l = node->children; l; l = l->next)
+    {
+      func(LPT_NODE(l->data), data);
+    }
+}

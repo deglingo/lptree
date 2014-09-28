@@ -10,6 +10,11 @@
 
 
 
+typedef void (* LptForeachFunc) ( LptNode *node,
+                                  gpointer data );
+
+
+
 /* LptNode:
  */
 struct _LptNode
@@ -43,6 +48,9 @@ void lpt_node_add ( LptNode *node,
 guint lpt_node_get_n_children ( LptNode *node );
 LptNode *lpt_node_get_child ( LptNode *node,
                               LObject *key );
+void lpt_node_foreach ( LptNode *node,
+                        LptForeachFunc func,
+                        gpointer data );
 
 
 

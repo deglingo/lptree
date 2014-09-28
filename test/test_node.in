@@ -74,4 +74,41 @@ unit /* node-int */
     lpt_node_add(ndir, nchild2, key2);
     PIF_CHECK_EQ(lpt_node_get_n_children(ndir), 2);
   }
+
+  header
+    {
+      struct foreach_data
+      {
+        GList *nodes;
+      };
+
+      static void foreach_func ( LptNode *node,
+                                 gpointer data_ )
+      {
+        struct foreach_data *data = data_;
+        data->nodes = g_list_append(data->nodes, node);
+      }
+    }
+
+  test foreach
+  {
+    struct foreach_data fdata;
+    LptNode *ndir = L_TRASH_OBJECT
+      (lpt_node_new(data->ns_dir));
+    LptNode *nchild1 = L_TRASH_OBJECT
+      (lpt_node_new(data->ns_int));
+    LptNode *nchild2 = L_TRASH_OBJECT
+      (lpt_node_new(data->ns_int));
+    LObject *key1 = L_TRASH_OBJECT(l_string_new("child1"));
+    LObject *key2 = L_TRASH_OBJECT(l_string_new("child2"));
+    lpt_node_add(ndir, nchild1, key1);
+    lpt_node_add(ndir, nchild2, key2);
+    /* go */
+    fdata.nodes = NULL;
+    lpt_node_foreach(ndir, foreach_func, &fdata);
+    PIF_CHECK_EQ(g_list_length(fdata.nodes), 2);
+    PIF_CHECK_EQ_PTR(g_list_nth_data(fdata.nodes, 0), nchild1);
+    PIF_CHECK_EQ_PTR(g_list_nth_data(fdata.nodes, 1), nchild2);
+    g_list_free(fdata.nodes);
+  }
 }
