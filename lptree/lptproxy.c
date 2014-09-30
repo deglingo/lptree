@@ -33,7 +33,7 @@ static LInt *lpt_proxy_message_ref ( LptProxyMessage msg )
  */
 struct _LptProxyClient
 {
-  int dummy_;
+  LptProxy *proxy;
 };
 
 
@@ -76,6 +76,15 @@ static void share_free ( Share *share )
   g_free(share->path);
   g_free(share->name);
   g_free(share);
+}
+
+
+
+/* lpt_proxy_client_get_proxy:
+ */
+LptProxy *lpt_proxy_client_get_proxy ( LptProxyClient *client )
+{
+  return client->proxy;
 }
 
 
@@ -180,32 +189,32 @@ static LTuple *_get_ntree ( LptProxy *proxy,
 
 
 
-/* _handle_request_connect:
- */
-static void _handle_request_connect ( LptProxy *proxy,
-                                      LInt *clid,
-                                      LObject *msg )
-{
-  LTuple *answer, *ntree;
-  LObject *shareid, *name;
-  Share *share;
-  ASSERT(L_TUPLE_SIZE(msg) == 4);
-  shareid = L_TUPLE_ITEM(msg, 2);
-  ASSERT(L_IS_INT(shareid));
-  name = L_TUPLE_ITEM(msg, 3);
-  ASSERT(L_IS_STRING(name));
-  share = g_hash_table_lookup(proxy->shares_by_name, L_STRING(name)->str);
-  ASSERT(share);
-  ntree = _get_ntree(proxy, share->root);
-  answer = l_tuple_newl_give(4,
-                             lpt_proxy_message_ref(LPT_PROXY_MESSAGE_CONFIRM_CONNECT),
-                             l_object_ref(clid),
-                             l_object_ref(shareid),
-                             ntree,
-                             NULL);
-  proxy->handler(proxy, L_INT_VALUE(clid), L_OBJECT(answer), proxy->handler_data);
-  l_object_unref(answer);
-}
+/* /\* _handle_request_connect: */
+/*  *\/ */
+/* static void _handle_request_connect ( LptProxy *proxy, */
+/*                                       LInt *clid, */
+/*                                       LObject *msg ) */
+/* { */
+/*   LTuple *answer, *ntree; */
+/*   LObject *shareid, *name; */
+/*   Share *share; */
+/*   ASSERT(L_TUPLE_SIZE(msg) == 4); */
+/*   shareid = L_TUPLE_ITEM(msg, 2); */
+/*   ASSERT(L_IS_INT(shareid)); */
+/*   name = L_TUPLE_ITEM(msg, 3); */
+/*   ASSERT(L_IS_STRING(name)); */
+/*   share = g_hash_table_lookup(proxy->shares_by_name, L_STRING(name)->str); */
+/*   ASSERT(share); */
+/*   ntree = _get_ntree(proxy, share->root); */
+/*   answer = l_tuple_newl_give(4, */
+/*                              lpt_proxy_message_ref(LPT_PROXY_MESSAGE_CONFIRM_CONNECT), */
+/*                              l_object_ref(clid), */
+/*                              l_object_ref(shareid), */
+/*                              ntree, */
+/*                              NULL); */
+/*   proxy->handler(proxy, L_INT_VALUE(clid), L_OBJECT(answer), proxy->handler_data); */
+/*   l_object_unref(answer); */
+/* } */
 
 
 
@@ -283,7 +292,8 @@ void lpt_proxy_handle_message ( LptProxy *proxy,
   /* handle key */
   switch (L_INT_VALUE(key)) {
   case LPT_PROXY_MESSAGE_REQUEST_CONNECT:
-    _handle_request_connect(proxy, clid, msg);
+    CL_DEBUG("[TODO] request_connect");
+    /* _handle_request_connect(proxy, clid, msg); */
     break;
   case LPT_PROXY_MESSAGE_CONFIRM_CONNECT:
     _handle_confirm_connect(proxy, clid, msg);
@@ -329,6 +339,7 @@ LptProxyClient *lpt_proxy_create_client ( LptProxy *proxy )
 {
   LptProxyClient *cli = g_new0(LptProxyClient, 1);
   proxy->clients = g_list_append(proxy->clients, cli);
+  cli->proxy = proxy;
   return cli;
 }
 
@@ -337,7 +348,7 @@ LptProxyClient *lpt_proxy_create_client ( LptProxy *proxy )
 /* lpt_proxy_connect_share:
  */
 void lpt_proxy_connect_share ( LptProxy *proxy,
-                               guint clid,
+                               LptProxyClient *client,
                                const gchar *share_name,
                                const gchar *dest_path,
                                gint flags )
@@ -349,12 +360,11 @@ void lpt_proxy_connect_share ( LptProxy *proxy,
   share->name = g_strdup(share_name); /* ?? */
   share->path = g_strdup(dest_path);
   g_hash_table_insert(proxy->shares, GUINT_TO_POINTER(share->shareid), share);
-  msg = l_tuple_newl_give(4,
+  msg = l_tuple_newl_give(3,
                           lpt_proxy_message_ref(LPT_PROXY_MESSAGE_REQUEST_CONNECT),
-                          l_int_new(clid),
                           l_int_new(share->shareid),
                           l_string_new(share_name),
                           NULL);
-  proxy->handler(proxy, clid, L_OBJECT(msg), proxy->handler_data);
+  proxy->handler(proxy, client, L_OBJECT(msg), proxy->handler_data);
   l_object_unref(msg);
 }

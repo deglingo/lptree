@@ -13,7 +13,7 @@
 typedef struct _LptProxyClient LptProxyClient;
 
 typedef void (* LptProxyHandler) ( LptProxy *proxy,
-                                   guint clid,
+                                   LptProxyClient *client,
                                    LObject *msg,
                                    gpointer data );
 
@@ -44,6 +44,8 @@ struct _LptProxyClass
 
 
 
+LptProxy *lpt_proxy_client_get_proxy ( LptProxyClient *client );
+
 LptProxy *lpt_proxy_new ( LptTree *tree,
                           LptProxyHandler handler,
                           gpointer handler_data );
@@ -58,7 +60,7 @@ void lpt_proxy_connect_client ( LptProxy *proxy,
                                 guint clid );
 LptProxyClient *lpt_proxy_create_client ( LptProxy *proxy );
 void lpt_proxy_connect_share ( LptProxy *proxy,
-                               guint clid,
+                               LptProxyClient *client,
                                const gchar *share_name,
                                const gchar *dest_path,
                                gint flags );
