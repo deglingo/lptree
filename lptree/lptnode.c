@@ -28,6 +28,7 @@ LptNode *lpt_node_new ( LptNSpec *nspec )
 {
   LptNode *node;
   node = LPT_NODE(l_object_new(LPT_CLASS_NODE, NULL));
+  node->nspec = l_object_ref(nspec);
   return node;
 }
 
@@ -37,10 +38,21 @@ LptNode *lpt_node_new ( LptNSpec *nspec )
  */
 static void _dispose ( LObject *object )
 {
-  L_OBJECT_CLEAR(LPT_NODE(object)->key);
-  g_list_free_full(LPT_NODE(object)->children, l_object_unref);
-  LPT_NODE(object)->children = NULL;
+  LptNode *node = LPT_NODE(object);
+  L_OBJECT_CLEAR(node->nspec);
+  L_OBJECT_CLEAR(node->key);
+  g_list_free_full(node->children, l_object_unref);
+  node->children = NULL;
   ((LObjectClass *) parent_class)->dispose(object);
+}
+
+
+
+/* lpt_node_get_nspec:
+ */
+LptNSpec *lpt_node_get_nspec ( LptNode *node )
+{
+  return node->nspec;
 }
 
 
