@@ -7,9 +7,17 @@ header {
 
 data { LptNSpec *nspec; }
 
-setup { data->nspec = lpt_nspec_int_new("test", -5, 7, 2); }
+setup
+{
+  l_trash_push();
+  data->nspec = lpt_nspec_int_new("test", -5, 7, 2);
+}
 
-teardown { L_OBJECT_CLEAR(data->nspec); }
+teardown
+{
+  L_OBJECT_CLEAR(data->nspec);
+  l_trash_pop();
+}
 
 test {
   PIF_CHECK(data->nspec);
@@ -18,4 +26,18 @@ test {
   PIF_CHECK(LPT_NSPEC_INT(data->nspec)->mini == -5);
   PIF_CHECK(LPT_NSPEC_INT(data->nspec)->maxi == 7);
   PIF_CHECK(LPT_NSPEC_INT(data->nspec)->defo == 2);
+}
+
+test get_state
+{
+  LObject *state = L_TRASH_OBJECT
+    (l_object_get_state(L_OBJECT(data->nspec)));
+  LptNSpec *nspec2 = L_TRASH_OBJECT
+    (l_object_new_from_state(LPT_CLASS_NSPEC_INT, state));
+  PIF_CHECK(nspec2);
+  PIF_CHECK(LPT_IS_NSPEC_INT(nspec2));
+  PIF_CHECK_EQ_STR(nspec2->name, "test");
+  PIF_CHECK_EQ(LPT_NSPEC_INT(nspec2)->mini, -5);
+  PIF_CHECK_EQ(LPT_NSPEC_INT(nspec2)->maxi, 7);
+  PIF_CHECK_EQ(LPT_NSPEC_INT(nspec2)->defo, 2);
 }
