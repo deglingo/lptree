@@ -8,6 +8,8 @@
 /* [FIXME] */
 #include "lptree/lptnspecdir.h"
 
+#include <string.h>
+
 
 
 /* LptProxyMessage:
@@ -189,32 +191,55 @@ static LTuple *_get_ntree ( LptProxy *proxy,
 
 
 
-/* /\* _handle_request_connect: */
-/*  *\/ */
-/* static void _handle_request_connect ( LptProxy *proxy, */
-/*                                       LInt *clid, */
-/*                                       LObject *msg ) */
-/* { */
-/*   LTuple *answer, *ntree; */
-/*   LObject *shareid, *name; */
-/*   Share *share; */
-/*   ASSERT(L_TUPLE_SIZE(msg) == 4); */
-/*   shareid = L_TUPLE_ITEM(msg, 2); */
-/*   ASSERT(L_IS_INT(shareid)); */
-/*   name = L_TUPLE_ITEM(msg, 3); */
-/*   ASSERT(L_IS_STRING(name)); */
-/*   share = g_hash_table_lookup(proxy->shares_by_name, L_STRING(name)->str); */
-/*   ASSERT(share); */
-/*   ntree = _get_ntree(proxy, share->root); */
-/*   answer = l_tuple_newl_give(4, */
-/*                              lpt_proxy_message_ref(LPT_PROXY_MESSAGE_CONFIRM_CONNECT), */
-/*                              l_object_ref(clid), */
-/*                              l_object_ref(shareid), */
-/*                              ntree, */
-/*                              NULL); */
-/*   proxy->handler(proxy, L_INT_VALUE(clid), L_OBJECT(answer), proxy->handler_data); */
-/*   l_object_unref(answer); */
-/* } */
+static void _msg_check ( LObject *msg,
+                         const gchar *format,
+                         ... )
+{
+  guint size = strlen(format) + 1; /* + key */
+  guint i;
+  const gchar *f;
+  va_list args;
+  ASSERT(L_IS_TUPLE(msg));
+  ASSERT(L_TUPLE_SIZE(msg) == size);
+  va_start(args, format);
+  for (i = 1, f = format; i < size; i++, f++) {
+    LObject **dest = va_arg(args, LObject **);
+    *dest = L_TUPLE_ITEM(msg, i);
+    switch (*f) {
+    case 'i': ASSERT(L_IS_INT(*dest)); break;
+    case 's': ASSERT(L_IS_STRING(*dest)); break;
+    case 't': ASSERT(L_IS_TUPLE(*dest)); break;
+    default: ASSERT(0);
+    }
+  }
+  va_end(args);
+}
+
+
+
+/* _handle_request_connect:
+ */
+static void _handle_request_connect ( LptProxy *proxy,
+                                      LptProxyClient *client,
+                                      LObject *msg )
+{
+  LInt *shareid;
+  LString *name;
+  _msg_check(msg, "is", &shareid, &name);
+  /* CL_DEBUG("request_connect: %s", l_object_to_string(msg)); */
+  LTuple *answer, *ntree;
+  Share *share;
+  share = g_hash_table_lookup(proxy->shares_by_name, L_STRING(name)->str);
+  ASSERT(share);
+  ntree = _get_ntree(proxy, share->root);
+  answer = l_tuple_newl_give(3,
+                             lpt_proxy_message_ref(LPT_PROXY_MESSAGE_CONFIRM_CONNECT),
+                             l_object_ref(shareid),
+                             ntree,
+                             NULL);
+  proxy->handler(proxy, client, L_OBJECT(answer), proxy->handler_data);
+  l_object_unref(answer);
+}
 
 
 
@@ -251,17 +276,14 @@ static void _create_ntree ( LptProxy *proxy,
 /* _handle_confirm_connect:
  */
 static void _handle_confirm_connect ( LptProxy *proxy,
-                                      LInt *clid,
+                                      LptProxyClient *client,
                                       LObject *msg )
 {
   LptNSpec *ns = lpt_nspec_dir_new("DIR");
   LObject *shareid, *ntree;
   Share *share;
-  ASSERT(L_TUPLE_SIZE(msg) == 4);
-  shareid = L_TUPLE_ITEM(msg, 2);
-  ASSERT(L_IS_INT(shareid));
-  ntree = L_TUPLE_ITEM(msg, 3);
-  ASSERT(L_IS_TUPLE(ntree));
+  /* CL_DEBUG("confim_connect: %s", l_object_to_string(msg)); */
+  _msg_check(msg, "it", &shareid, &ntree);
   share = g_hash_table_lookup(proxy->shares, GUINT_TO_POINTER(L_INT_VALUE(shareid)));
   ASSERT(share);
   _create_ntree(proxy, share, L_TUPLE(ntree), NULL);
@@ -277,26 +299,21 @@ void lpt_proxy_handle_message ( LptProxy *proxy,
                                 LObject *msg )
 {
   LObject *key;
-  LInt *clid;
   /* CL_DEBUG("proxy_message(%s, %s)", */
   /*          l_object_to_string(L_OBJECT(proxy)), */
   /*          l_object_to_string(L_OBJECT(msg))); */
   ASSERT(L_IS_TUPLE(msg));
-  ASSERT(L_TUPLE_SIZE(msg) >= 2);
+  ASSERT(L_TUPLE_SIZE(msg) >= 1);
   /* get key */
   key = L_TUPLE_ITEM(msg, 0);
   ASSERT(L_IS_INT(key));
-  /* get clid */
-  clid = L_INT(L_TUPLE_ITEM(msg, 1));
-  ASSERT(L_IS_INT(clid));
   /* handle key */
   switch (L_INT_VALUE(key)) {
   case LPT_PROXY_MESSAGE_REQUEST_CONNECT:
-    CL_DEBUG("[TODO] request_connect");
-    /* _handle_request_connect(proxy, clid, msg); */
+    _handle_request_connect(proxy, client, msg);
     break;
   case LPT_PROXY_MESSAGE_CONFIRM_CONNECT:
-    _handle_confirm_connect(proxy, clid, msg);
+    _handle_confirm_connect(proxy, client, msg);
     break;
   default:
     CL_DEBUG("[TODO] msg key: %d", L_INT_VALUE(key));
