@@ -15,6 +15,7 @@ struct _LptNSpec
 {
   LPT_NSPEC_INSTANCE_HEADER;
 
+  guint nsid;
   gchar *name;
 };
 
@@ -26,6 +27,10 @@ struct _LptNSpecClass
 {
   LPT_NSPEC_CLASS_HEADER;
 };
+
+
+
+guint lpt_nspec_get_id ( LptNSpec *nspec );
 
 
 

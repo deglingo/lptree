@@ -13,6 +13,7 @@ teardown { L_OBJECT_CLEAR(data->nspec); }
 
 test {
   PIF_CHECK(data->nspec);
+  PIF_CHECK(lpt_nspec_get_id(data->nspec)); /* ?? */
   PIF_CHECK(!strcmp(data->nspec->name, "test"));
   PIF_CHECK(LPT_NSPEC_INT(data->nspec)->mini == -5);
   PIF_CHECK(LPT_NSPEC_INT(data->nspec)->maxi == 7);

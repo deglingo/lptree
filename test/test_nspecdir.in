@@ -13,5 +13,6 @@ teardown { L_OBJECT_CLEAR(data->nspec); }
 
 test {
   PIF_CHECK(data->nspec);
+  PIF_CHECK(lpt_nspec_get_id(data->nspec)); /* ?? */
   PIF_CHECK(!strcmp(data->nspec->name, "test-dir"));
 }
