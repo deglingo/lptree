@@ -264,6 +264,7 @@ static void _handle_confirm_connect ( LptProxy *proxy,
 /* lpt_proxy_handle_message:
  */
 void lpt_proxy_handle_message ( LptProxy *proxy,
+                                LptProxyClient *client,
                                 LObject *msg )
 {
   LObject *key;

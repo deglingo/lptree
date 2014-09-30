@@ -36,35 +36,9 @@ header
   }
 }
 
-header
-{
-  static void proxy_handler ( LptProxy *proxy,
-                              guint clid,
-                              LObject *msg,
-                              gpointer data )
-  {
-    GHashTable *cmap = data;
-    LptProxy *dest = client_map_get(cmap, clid);
-    lpt_proxy_handle_message(dest, msg);
-  }
-}
-
-data
-{ 
-  LptTree *tree;
-  LptProxy *proxy;
-  GHashTable *client_map;
-}
-
 setup
 {
   l_trash_push();
-  data->tree = L_TRASH_OBJECT
-    (lpt_tree_new());
-  data->client_map = l_trash_add
-    (client_map_new(), (LTrashFunc) client_map_free);
-  data->proxy = L_TRASH_OBJECT
-    (lpt_proxy_new(data->tree, proxy_handler, data->client_map));
 }
 
 teardown
@@ -72,60 +46,46 @@ teardown
   l_trash_pop();
 }
 
-test new
-{ 
-  PIF_CHECK(data->proxy);
-}
+/* test new */
+/* {  */
+/*   PIF_CHECK(data->proxy); */
+/* } */
 
-test create_share
-{
-  lpt_proxy_create_share(data->proxy, "TESTSHARE", "/", 0);
-}
+/* test create_share */
+/* { */
+/*   lpt_proxy_create_share(data->proxy, "TESTSHARE", "/", 0); */
+/* } */
 
-test connect_client
-{
-  lpt_proxy_connect_client(data->proxy, 1);
-}
+/* test connect_client */
+/* { */
+/*   lpt_proxy_connect_client(data->proxy, 1); */
+/* } */
 
-header
-{
-  static void setup_test_tree ( LptTree *tree )
-  {
-    LptNSpec *ns_dir = L_TRASH_OBJECT
-      (lpt_nspec_dir_new("DIR"));
-    LptNSpec *ns_int = L_TRASH_OBJECT
-      (lpt_nspec_int_new("INT", 0, 10, 0));
-    lpt_tree_create_node(tree, "/share1", ns_dir);
-    lpt_tree_create_node(tree, "/share1/node1", ns_int);
-    lpt_tree_create_node(tree, "/share2", ns_dir);
-    lpt_tree_create_node(tree, "/share2/node1", ns_int);
-  }
-}
-test complete
-{
-  LptTree *client_tree;
-  LptProxy *client_proxy;
-  GHashTable *client_map = l_trash_add
-    (client_map_new(), (LTrashFunc) client_map_free);
-  /* setup the server side */
-  setup_test_tree(data->tree);
-  lpt_proxy_create_share(data->proxy, "SHARE1", "/share1", 0);
-  lpt_proxy_create_share(data->proxy, "SHARE2", "/share2", 0);
-  lpt_proxy_connect_client(data->proxy, 1);
-  client_map_add(client_map, 1, data->proxy);
-  /* setup the client side */
-  client_tree = L_TRASH_OBJECT(lpt_tree_new());
-  client_proxy = L_TRASH_OBJECT(lpt_proxy_new(client_tree, proxy_handler, client_map));
-  client_map_add(data->client_map, 1, client_proxy);
-  lpt_proxy_connect_client(client_proxy, 1);
-  lpt_proxy_connect_share(client_proxy, 1, "SHARE1", "/dest-share1", 0);
-  lpt_proxy_connect_share(client_proxy, 1, "SHARE2", "/dest-share2", 0);
-  /* /\* check *\/ */
-  PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share1"));
-  PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share1/node1"));
-  PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2"));
-  PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2/node1"));
-}
+/* test complete */
+/* { */
+/*   LptTree *client_tree; */
+/*   LptProxy *client_proxy; */
+/*   GHashTable *client_map = l_trash_add */
+/*     (client_map_new(), (LTrashFunc) client_map_free); */
+/*   /\* setup the server side *\/ */
+/*   setup_test_tree(data->tree); */
+/*   lpt_proxy_create_share(data->proxy, "SHARE1", "/share1", 0); */
+/*   lpt_proxy_create_share(data->proxy, "SHARE2", "/share2", 0); */
+/*   lpt_proxy_connect_client(data->proxy, 1); */
+/*   client_map_add(client_map, 1, data->proxy); */
+/*   /\* setup the client side *\/ */
+/*   client_tree = L_TRASH_OBJECT(lpt_tree_new()); */
+/*   client_proxy = L_TRASH_OBJECT(lpt_proxy_new(client_tree, proxy_handler, client_map)); */
+/*   client_map_add(data->client_map, 1, client_proxy); */
+/*   lpt_proxy_connect_client(client_proxy, 1); */
+/*   lpt_proxy_connect_share(client_proxy, 1, "SHARE1", "/dest-share1", 0); */
+/*   lpt_proxy_connect_share(client_proxy, 1, "SHARE2", "/dest-share2", 0); */
+/*   /\* /\\* check *\\/ *\/ */
+/*   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share1")); */
+/*   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share1/node1")); */
+/*   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2")); */
+/*   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2/node1")); */
+/* } */
 
 /********************************************************************/
 
