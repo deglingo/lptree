@@ -10,6 +10,8 @@
 
 
 
+typedef struct _LptProxyClient LptProxyClient;
+
 typedef void (* LptProxyHandler) ( LptProxy *proxy,
                                    guint clid,
                                    LObject *msg,
@@ -52,6 +54,7 @@ void lpt_proxy_create_share ( LptProxy *proxy,
                               gint flags );
 void lpt_proxy_connect_client ( LptProxy *proxy,
                                 guint clid );
+LptProxyClient *lpt_proxy_create_client ( LptProxy *proxy );
 void lpt_proxy_connect_share ( LptProxy *proxy,
                                guint clid,
                                const gchar *share_name,

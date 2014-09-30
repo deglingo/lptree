@@ -126,3 +126,34 @@ test complete
   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2"));
   PIF_CHECK(lpt_tree_get_node(client_tree, "/dest-share2/node1"));
 }
+
+/********************************************************************/
+
+header
+{
+  static LptProxy *_setup_server_proxy ( void )
+  {
+    LptTree *tree = L_TRASH_OBJECT
+      (lpt_tree_new());
+    LptProxy *proxy = L_TRASH_OBJECT
+      (lpt_proxy_new(tree, NULL, NULL));
+    return proxy;
+  }
+
+  static LptProxy *_setup_client_proxy ( void )
+  {
+    LptTree *tree = L_TRASH_OBJECT
+      (lpt_tree_new());
+    LptProxy *proxy = L_TRASH_OBJECT
+      (lpt_proxy_new(tree, NULL, NULL));
+    return proxy;
+  }
+}
+
+test new_complete
+{
+  LptProxy *proxy1 = _setup_server_proxy();
+  LptProxy *proxy2 = _setup_client_proxy();
+  LptProxyClient *p1_p2 = lpt_proxy_create_client(proxy1);
+  LptProxyClient *p2_p1 = lpt_proxy_create_client(proxy2);
+}

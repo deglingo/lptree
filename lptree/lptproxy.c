@@ -311,6 +311,15 @@ void lpt_proxy_connect_client ( LptProxy *proxy,
 
 
 
+/* lpt_proxy_create_client:
+ */
+LptProxyClient *lpt_proxy_create_client ( LptProxy *proxy )
+{
+  return NULL;
+}
+
+
+
 /* lpt_proxy_connect_share:
  */
 void lpt_proxy_connect_share ( LptProxy *proxy,
