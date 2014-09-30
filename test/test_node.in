@@ -29,6 +29,7 @@ unit /* node-int */
 
   test { 
     PIF_CHECK(data->node);
+    PIF_CHECK(LPT_IS_NSPEC_INT(lpt_node_get_nspec(data->node)));
   }
 
   test {
