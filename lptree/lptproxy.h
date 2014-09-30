@@ -28,6 +28,7 @@ struct _LptProxy
   LptTree *tree;
   LptProxyHandler handler;
   gpointer handler_data;
+  GList *clients;
   GHashTable *shares; /* map <shareid, Share> */
   GHashTable *shares_by_name; /* map <gchar *name, Share> */
 };

@@ -29,6 +29,15 @@ static LInt *lpt_proxy_message_ref ( LptProxyMessage msg )
 
 
 
+/* LptProxyClient:
+ */
+struct _LptProxyClient
+{
+  int dummy_;
+};
+
+
+
 /* Share:
  */
 typedef struct _Share
@@ -108,6 +117,8 @@ LptProxy *lpt_proxy_new ( LptTree *tree,
 static void _dispose ( LObject *object )
 {
   LptProxy *proxy = LPT_PROXY(object);
+  g_list_free_full(proxy->clients, g_free);
+  proxy->clients = NULL;
   if (proxy->shares) {
     g_hash_table_unref(proxy->shares);
     proxy->shares = NULL;
@@ -315,7 +326,9 @@ void lpt_proxy_connect_client ( LptProxy *proxy,
  */
 LptProxyClient *lpt_proxy_create_client ( LptProxy *proxy )
 {
-  return NULL;
+  LptProxyClient *cli = g_new0(LptProxyClient, 1);
+  proxy->clients = g_list_append(proxy->clients, cli);
+  return cli;
 }
 
 

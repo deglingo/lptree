@@ -154,6 +154,7 @@ test new_complete
 {
   LptProxy *proxy1 = _setup_server_proxy();
   LptProxy *proxy2 = _setup_client_proxy();
-  LptProxyClient *p1_p2 = lpt_proxy_create_client(proxy1);
-  LptProxyClient *p2_p1 = lpt_proxy_create_client(proxy2);
+  LptProxyClient *p1_p2, *p2_p1;
+  PIF_CHECK((p1_p2 = lpt_proxy_create_client(proxy1)));
+  PIF_CHECK((p2_p1 = lpt_proxy_create_client(proxy2)));
 }
