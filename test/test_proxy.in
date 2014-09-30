@@ -127,6 +127,18 @@ header
   }
 }
 
+#define CHECK_NODE_DIR(n_) do {                         \
+    LptNode *n = (n_);                                  \
+    PIF_CHECK(n);                                       \
+    PIF_CHECK(LPT_IS_NSPEC_DIR(lpt_node_get_nspec(n))); \
+  } while (0)
+
+#define CHECK_NODE_INT(n_) do {                         \
+    LptNode *n = (n_);                                  \
+    PIF_CHECK(n);                                       \
+    PIF_CHECK(LPT_IS_NSPEC_INT(lpt_node_get_nspec(n))); \
+  } while (0)
+
 test new_complete
 {
   GHashTable *cmap = l_trash_add
@@ -142,4 +154,7 @@ test new_complete
   client_map_add(cmap, p1_p2, p2_p1);
   /* connect client to server's share */
   lpt_proxy_connect_share(proxy2, p2_p1, "SHARE1", "/dest-share1", 0);
+  /* check the result */
+  CHECK_NODE_DIR(lpt_tree_get_node(proxy2->tree, "/dest-share1"));
+  CHECK_NODE_INT(lpt_tree_get_node(proxy2->tree, "/dest-share1/node1"));
 }

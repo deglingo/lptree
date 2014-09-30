@@ -31,6 +31,7 @@ struct _LptProxy
   GList *clients;
   GHashTable *shares; /* map <shareid, Share> */
   GHashTable *shares_by_name; /* map <gchar *name, Share> */
+  LDict *nspecs;
 };
 
 
