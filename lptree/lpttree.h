@@ -72,6 +72,7 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
                              GDestroyNotify destroy_data );
 
 /* sync */
+LptTree *lpt_client_get_tree ( LptClient *client );
 void lpt_tree_set_message_handler ( LptTree *tree,
                                     LptMessageHandler handler,
                                     gpointer data,

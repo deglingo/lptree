@@ -48,7 +48,7 @@ header
 
 test
 {
-  LptClient *c1_t2, *c2_t1;
+  LptClient *t1_c2, *t2_c1;
   GHashTable *t1_cmap, *t2_cmap;
   /* setup the handlers */
   t1_cmap = g_hash_table_new(NULL, NULL);
@@ -60,8 +60,10 @@ test
   /* setup the shares */
   lpt_tree_create_share(data->t1, "SHARE1", "/share1", 0);
   /* create the clients */
-  PIF_CHECK((c1_t2 = lpt_tree_add_client(data->t1, "t2")));
-  PIF_CHECK((c2_t1 = lpt_tree_add_client(data->t2, "t1")));
+  PIF_CHECK((t1_c2 = lpt_tree_add_client(data->t1, "t2")));
+  PIF_CHECK((t2_c1 = lpt_tree_add_client(data->t2, "t1")));
+  PIF_CHECK_EQ_PTR(lpt_client_get_tree(t1_c2), data->t1);
+  PIF_CHECK_EQ_PTR(lpt_client_get_tree(t2_c1), data->t2);
   /* connection */
-  lpt_tree_connect_share(data->t2, c2_t1, "SHARE1", "/dest-share1", 0);
+  lpt_tree_connect_share(data->t2, t2_c1, "SHARE1", "/dest-share1", 0);
 }
