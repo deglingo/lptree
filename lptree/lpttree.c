@@ -95,3 +95,16 @@ LptNode *lpt_tree_get_node ( LptTree *tree,
   }
   return node;
 }
+
+
+
+/* lpt_tree_add_hook:
+ */
+LptHook *lpt_tree_add_hook ( LptTree *tree,
+                             LptHookFunc func,
+                             LptHookFlags flags,
+                             gpointer data,
+                             GDestroyNotify destroy_data )
+{
+  return NULL;
+}

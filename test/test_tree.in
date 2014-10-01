@@ -72,4 +72,19 @@ unit
     PIF_CHECK_EQ_PTR
       (lpt_tree_get_node(data->tree, "/b/b"), n_bb);
   }
+
+  header
+  {
+    static gboolean _hook_func ( gpointer data )
+    {
+      fprintf(stderr, "\n[TODO] hook_func\n");
+    }
+  }
+
+  test hook
+  {
+    /* LptNode *n = lpt_tree_create_node(data->tree, "/n", data->nspec_int); */
+    LptHook *hook = lpt_tree_add_hook(data->tree, _hook_func, 0, NULL, NULL);
+    /* PIF_CHECK(hook); */
+  }
 }
