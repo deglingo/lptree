@@ -15,7 +15,7 @@ modules =
   test_treesync
   test_proxy
 
-cflags = -I@top_srcdir@ -I@top_builddir@ @PIFTEST_CFLAGS@ @LOS_CFLAGS@
+cflags = -DCL_LOG_DOMAIN=\"lptree-test\" -I@top_srcdir@ -I@top_builddir@ @PIFTEST_CFLAGS@ @LOS_CFLAGS@
 
 ldflags = -L@top_builddir@/lptree -llptree @PIFTEST_LIBS@ @LOS_LIBS@
 

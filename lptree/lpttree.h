@@ -77,6 +77,9 @@ void lpt_tree_set_message_handler ( LptTree *tree,
                                     LptMessageHandler handler,
                                     gpointer data,
                                     GDestroyNotify destroy_data );
+void lpt_tree_handle_message ( LptTree *tree,
+                               LptClient *client,
+                               LObject *message );
 void lpt_tree_create_share ( LptTree *tree,
                              const gchar *name,
                              const gchar *path,

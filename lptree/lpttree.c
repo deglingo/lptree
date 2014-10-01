@@ -212,6 +212,24 @@ void lpt_tree_set_message_handler ( LptTree *tree,
 
 
 
+/* lpt_tree_handle_message:
+ */
+void lpt_tree_handle_message ( LptTree *tree,
+                               LptClient *client,
+                               LObject *message )
+{
+  ASSERT(tree);
+  ASSERT(client);
+  ASSERT(client->tree == tree);
+  ASSERT(message);
+  ASSERT(L_IS_TUPLE(message));
+  ASSERT(L_TUPLE_SIZE(message) >= 1);
+  ASSERT(L_IS_INT(L_TUPLE_ITEM(message, 0)));
+  CL_DEBUG("[TODO] message: %s", l_object_to_string(message));
+}
+
+
+
 /* lpt_tree_create_share:
  */
 void lpt_tree_create_share ( LptTree *tree,
@@ -231,6 +249,12 @@ void lpt_tree_connect_share ( LptTree *tree,
                               const gchar *dest_path,
                               guint flags )
 {
+  LTuple *msg;
+  msg = l_tuple_new(2);
+  l_tuple_give_item(msg, 0, L_OBJECT(l_int_new(0 /* LPT_MESSAGE_CONNECT_REQUEST */)));
+  l_tuple_give_item(msg, 1, L_OBJECT(l_string_new(name)));
+  tree->handler(tree, client, L_OBJECT(msg), tree->handler_data);
+  l_object_unref(msg);
 }
 
 
