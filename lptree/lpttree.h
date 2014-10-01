@@ -32,6 +32,7 @@ struct _LptTree
   LPT_TREE_INSTANCE_HEADER;
 
   LptNode *root;
+  GList *hooks;
 };
 
 

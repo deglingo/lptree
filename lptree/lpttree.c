@@ -9,7 +9,34 @@
 
 
 
+/* LptHook:
+ */
+struct _LptHook
+{
+  int _dummy;
+};
+
+
+
 static void _dispose ( LObject *object );
+
+
+
+/* lpt_hook_new:
+ */
+static LptHook *lpt_hook_new ( void )
+{
+  return g_new0(LptHook, 1);
+}
+
+
+
+/* lpt_hook_free:
+ */
+static void lpt_hook_free ( LptHook *hook )
+{
+  g_free(hook);
+}
 
 
 
@@ -40,7 +67,10 @@ LptTree *lpt_tree_new ( void )
  */
 static void _dispose ( LObject *object )
 {
-  L_OBJECT_CLEAR(LPT_TREE(object)->root);
+  LptTree *tree = LPT_TREE(object);
+  L_OBJECT_CLEAR(tree->root);
+  g_list_free_full(tree->hooks, (GDestroyNotify) lpt_hook_free);
+  tree->hooks = NULL;
   /* [FIXME] */
   ((LObjectClass *) parent_class)->dispose(object);
 }
@@ -106,5 +136,7 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
                              gpointer data,
                              GDestroyNotify destroy_data )
 {
-  return NULL;
+  LptHook *hook = lpt_hook_new();
+  tree->hooks = g_list_append(tree->hooks, hook);
+  return hook;
 }
