@@ -58,6 +58,11 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
                              gpointer data,
                              GDestroyNotify destroy_data );
 
+/* private */
+void _lpt_tree_set_node_value ( LptTree *tree,
+                                LptNode *node,
+                                LObject *value );
+
 
 
 #endif

@@ -94,17 +94,32 @@ unit
 
   header
   {
-    static gboolean _hook_func ( gpointer data )
+    struct hook_data
     {
-      fprintf(stderr, "\n[TODO] hook_func\n");
+      guint n_calls;
+    };
+
+    static gboolean _hook_func ( gpointer data_ )
+    {
+      struct hook_data *data = data_;
+      data->n_calls++;
+      /* fprintf(stderr, "\n[TODO] hook_func\n"); */
       return TRUE;
     }
   }
 
   test hook
   {
-    /* LptNode *n = lpt_tree_create_node(data->tree, "/n", data->nspec_int); */
-    LptHook *hook = lpt_tree_add_hook(data->tree, _hook_func, 0, NULL, NULL);
+    struct hook_data hdata;
+    LptHook *hook;
+    LptNode *n;
+    n = lpt_tree_create_node(data->tree, "/n", data->nspec_int);
+    /* create the hook */
+    hdata.n_calls = 0;
+    hook = lpt_tree_add_hook(data->tree, _hook_func, 0, &hdata, NULL);
     PIF_CHECK(hook);
+    /* set_value event */
+    lpt_node_set_value(n, L_TRASH_OBJECT(l_int_new(1)));
+    PIF_CHECK_EQ(hdata.n_calls, 1);
   }
 }

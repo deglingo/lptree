@@ -13,7 +13,8 @@
  */
 struct _LptHook
 {
-  int _dummy;
+  LptHookFunc func;
+  gpointer data;
 };
 
 
@@ -139,6 +140,35 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
                              GDestroyNotify destroy_data )
 {
   LptHook *hook = lpt_hook_new();
+  hook->func = func;
+  hook->data = data;
   tree->hooks = g_list_append(tree->hooks, hook);
   return hook;
+}
+
+
+
+/* _lpt_tree_set_node_value:
+ */
+void _lpt_tree_set_node_value ( LptTree *tree,
+                                LptNode *node,
+                                LObject *value )
+{
+  /* note the 'tree' may be nul here */
+  ASSERT(node->tree == tree);
+  if (tree)
+    {
+      GList *l;
+      /* call hooks */
+      for (l = tree->hooks; l; l = l->next)
+        {
+          LptHook *hook = l->data;
+          hook->func(hook->data);
+        }
+    }
+  /* set the value */
+  l_object_ref(value);
+  if (node->value)
+    L_OBJECT_CLEAR(node->value);
+  node->value = value;
 }

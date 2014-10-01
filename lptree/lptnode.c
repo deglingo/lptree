@@ -71,10 +71,7 @@ LptNSpec *lpt_node_get_nspec ( LptNode *node )
 void lpt_node_set_value ( LptNode *node,
                           LObject *value )
 {
-  l_object_ref(value);
-  if (node->value)
-    L_OBJECT_CLEAR(node->value);
-  node->value = value;
+  _lpt_tree_set_node_value(node->tree, node, value);
 }
 
 
