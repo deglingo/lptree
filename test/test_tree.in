@@ -99,7 +99,8 @@ unit
       guint n_calls;
     };
 
-    static gboolean _hook_func ( gpointer data_ )
+    static gboolean _hook_func ( LptEvent *event,
+                                 gpointer data_ )
     {
       struct hook_data *data = data_;
       data->n_calls++;

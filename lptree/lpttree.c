@@ -158,12 +158,15 @@ void _lpt_tree_set_node_value ( LptTree *tree,
   ASSERT(node->tree == tree);
   if (tree)
     {
+      LptEvent event;
       GList *l;
+      /* create the event */
+      event.type = 0; /* [fixme] */
       /* call hooks */
       for (l = tree->hooks; l; l = l->next)
         {
           LptHook *hook = l->data;
-          hook->func(hook->data);
+          hook->func(&event, hook->data);
         }
     }
   /* set the value */

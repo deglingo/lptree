@@ -6,12 +6,14 @@
 
 #include "lptree/lptbase.h"
 #include "lptree/lptnode.h"
+#include "lptree/lptevent.h"
 #include "lptree/lpttree-def.h"
 
 
 
 typedef struct _LptHook LptHook;
-typedef gboolean (* LptHookFunc) ( gpointer data );
+typedef gboolean (* LptHookFunc) ( LptEvent *event,
+                                   gpointer data );
 
 
 
