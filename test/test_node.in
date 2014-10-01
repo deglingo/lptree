@@ -66,9 +66,12 @@ unit node_int
 
   test
     {
-      LptNode *n = lpt_node_new(data->ns_int);
+      LptNode *n = L_TRASH_OBJECT
+        (lpt_node_new(data->ns_int));
       PIF_CHECK(n);
       LOS_CHECK_INT(lpt_node_get_value(n), 2);
+      lpt_node_set_value(n, L_TRASH_OBJECT(l_int_new(3)));
+      LOS_CHECK_INT(lpt_node_get_value(n), 3);
     }
 }
 
@@ -99,7 +102,7 @@ unit /* node-int */
     PIF_CHECK(LPT_IS_NSPEC_INT(lpt_node_get_nspec(data->node)));
   }
 
-  test {
+  test get_set_value {
     LObject *val;
     val = L_OBJECT(l_int_new(42));
     lpt_node_set_value(data->node, val);
@@ -107,7 +110,6 @@ unit /* node-int */
     val = lpt_node_get_value(data->node);
     PIF_CHECK(L_IS_INT(val));
     PIF_CHECK(L_INT_VALUE(val) == 42);
-    L_OBJECT_CLEAR(val);
   }
 
   test add

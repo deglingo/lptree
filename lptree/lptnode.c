@@ -39,6 +39,7 @@ static void _dispose ( LObject *object )
   LptNode *node = LPT_NODE(object);
   L_OBJECT_CLEAR(node->nspec);
   L_OBJECT_CLEAR(node->key);
+  L_OBJECT_CLEAR(node->value);
   g_list_free_full(node->children, l_object_unref);
   node->children = NULL;
   ((LObjectClass *) parent_class)->dispose(object);
