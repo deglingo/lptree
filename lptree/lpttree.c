@@ -191,6 +191,18 @@ void lpt_tree_create_share ( LptTree *tree,
 
 
 
+/* lpt_tree_connect_share:
+ */
+void lpt_tree_connect_share ( LptTree *tree,
+                              LptClient *client,
+                              const gchar *name,
+                              const gchar *dest_path,
+                              guint flags )
+{
+}
+
+
+
 /* lpt_tree_add_client:
  */
 LptClient *lpt_tree_add_client ( LptTree *tree,

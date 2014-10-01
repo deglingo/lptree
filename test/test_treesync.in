@@ -43,4 +43,6 @@ test
   /* create the clients */
   PIF_CHECK((c1_t2 = lpt_tree_add_client(data->t1, "t2")));
   PIF_CHECK((c2_t1 = lpt_tree_add_client(data->t2, "t1")));
+  /* connection */
+  lpt_tree_connect_share(data->t2, c2_t1, "SHARE1", "/dest-share1", 0);
 }
