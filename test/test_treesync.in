@@ -71,6 +71,7 @@ test
   PIF_CHECK((t2_c1 = lpt_tree_add_client(data->t2, "t1")));
   PIF_CHECK_EQ_PTR(lpt_client_get_tree(t1_c2), data->t1);
   PIF_CHECK_EQ_PTR(lpt_client_get_tree(t2_c1), data->t2);
+  g_hash_table_insert(t1_cmap, t1_c2, t2_c1);
   g_hash_table_insert(t2_cmap, t2_c1, t1_c2);
   /* connection */
   lpt_tree_connect_share(data->t2, t2_c1, "SHARE1", "/dest-share1", 0);

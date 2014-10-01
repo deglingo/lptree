@@ -7,6 +7,18 @@
 #include "lptree/lptpath.h"
 #include "lptree/lpttree.inl"
 
+#include <string.h>
+
+
+
+/* LptMessage:
+ */
+enum
+  {
+    LPT_MESSAGE_CONNECT_REQUEST,
+    LPT_MESSAGE_CONNECT_ACCEPT,
+  };
+
 
 
 /* LptClient:
@@ -212,6 +224,57 @@ void lpt_tree_set_message_handler ( LptTree *tree,
 
 
 
+static void _unpack_message ( LObject *message,
+                              const gchar *format,
+                              ... )
+  G_GNUC_NULL_TERMINATED;
+
+static void _unpack_message ( LObject *message,
+                              const gchar *format,
+                              ... )
+{
+  guint len = strlen(format) + 1;
+  guint i;
+  const gchar *f;
+  va_list args;
+  LObject **item;
+  ASSERT(message);
+  ASSERT(L_IS_TUPLE(message));
+  ASSERT(L_TUPLE_SIZE(message) == len);
+  va_start(args, format);
+  for (i = 1, f = format; i < len; i++, f++) {
+    item = va_arg(args, LObject **);
+    *item = L_TUPLE_ITEM(message, i);
+    switch (*f) {
+    case 's': ASSERT(L_IS_STRING(*item)); break;
+    default: CL_ERROR("bad format: '%c'", *f);
+    }
+  }
+  item = va_arg(args, LObject **);
+  ASSERT(!item);
+  va_end(args);
+}
+
+
+
+/* _handle_connect_request:
+ */
+static void _handle_connect_request ( LptTree *tree,
+                                      LptClient *client,
+                                      LObject *message )
+{
+  LString *name;
+  LTuple *answer;
+  _unpack_message(message, "s", &name, NULL);
+  answer = l_tuple_new(2);
+  l_tuple_give_item(answer, 0, L_OBJECT(l_int_new(LPT_MESSAGE_CONNECT_ACCEPT)));
+  l_tuple_give_item(answer, 1, l_object_ref(name));
+  tree->handler(tree, client, L_OBJECT(answer), tree->handler_data);
+  l_object_unref(answer);
+}
+
+
+
 /* lpt_tree_handle_message:
  */
 void lpt_tree_handle_message ( LptTree *tree,
@@ -225,7 +288,14 @@ void lpt_tree_handle_message ( LptTree *tree,
   ASSERT(L_IS_TUPLE(message));
   ASSERT(L_TUPLE_SIZE(message) >= 1);
   ASSERT(L_IS_INT(L_TUPLE_ITEM(message, 0)));
-  CL_DEBUG("[TODO] message: %s", l_object_to_string(message));
+  switch (L_INT_VALUE(L_TUPLE_ITEM(message, 0)))
+    {
+    case LPT_MESSAGE_CONNECT_REQUEST:
+      _handle_connect_request(tree, client, message);
+      break;
+    default:
+      CL_DEBUG("[TODO] message: %s", l_object_to_string(message));
+    }
 }
 
 
@@ -251,7 +321,7 @@ void lpt_tree_connect_share ( LptTree *tree,
 {
   LTuple *msg;
   msg = l_tuple_new(2);
-  l_tuple_give_item(msg, 0, L_OBJECT(l_int_new(0 /* LPT_MESSAGE_CONNECT_REQUEST */)));
+  l_tuple_give_item(msg, 0, L_OBJECT(l_int_new(LPT_MESSAGE_CONNECT_REQUEST)));
   l_tuple_give_item(msg, 1, L_OBJECT(l_string_new(name)));
   tree->handler(tree, client, L_OBJECT(msg), tree->handler_data);
   l_object_unref(msg);
