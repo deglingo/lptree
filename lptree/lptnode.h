@@ -8,6 +8,8 @@
 #include "lptree/lptnspec.h"
 #include "lptree/lptnode-def.h"
 
+struct _LptTree;
+
 
 
 typedef void (* LptForeachFunc) ( LptNode *node,
@@ -21,6 +23,7 @@ struct _LptNode
 {
   LPT_NODE_INSTANCE_HEADER;
 
+  struct _LptTree *tree;
   LptNSpec *nspec;
   LObject *key;
   /* [REMOVEME] should go in NData */
@@ -40,6 +43,7 @@ struct _LptNodeClass
 
 
 LptNode *lpt_node_new ( LptNSpec *nspec );
+struct _LptTree *lpt_node_get_tree ( LptNode *node );
 LptNSpec *lpt_node_get_nspec ( LptNode *node );
 void lpt_node_set_value ( LptNode *node,
                           LObject *value );

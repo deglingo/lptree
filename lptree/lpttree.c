@@ -57,6 +57,8 @@ LptTree *lpt_tree_new ( void )
   LptNSpec *nspec = lpt_nspec_dir_new("root");
   tree = LPT_TREE(l_object_new(LPT_CLASS_TREE, NULL));
   tree->root = lpt_node_new(nspec);
+  /* [fixme] ?? */
+  tree->root->tree = tree;
   l_object_unref(nspec);
   return tree;
 }

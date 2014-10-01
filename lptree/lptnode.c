@@ -3,6 +3,7 @@
 
 #include "lptree/private.h"
 #include "lptree/lptnode.h"
+#include "lptree/lpttree.h"
 #include "lptree/lptnode.inl"
 
 #include <string.h> /* [removeme] */
@@ -43,6 +44,15 @@ static void _dispose ( LObject *object )
   g_list_free_full(node->children, l_object_unref);
   node->children = NULL;
   ((LObjectClass *) parent_class)->dispose(object);
+}
+
+
+
+/* lpt_node_get_tree:
+ */
+LptTree *lpt_node_get_tree ( LptNode *node )
+{
+  return node->tree;
 }
 
 

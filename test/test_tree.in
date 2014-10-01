@@ -24,6 +24,7 @@ test new
 { 
   PIF_CHECK(data->tree);
   PIF_CHECK(data->tree->root); /* ?? */
+  PIF_CHECK_EQ_PTR(lpt_node_get_tree(data->tree->root), data->tree);
 }
 
 unit
@@ -71,6 +72,8 @@ unit
       (lpt_tree_get_node(data->tree, "/b/a"), n_ba);
     PIF_CHECK_EQ_PTR
       (lpt_tree_get_node(data->tree, "/b/b"), n_bb);
+    /* make sure all nodes are attached to the tree */
+
   }
 
   header
