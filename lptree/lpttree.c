@@ -106,6 +106,11 @@ static void _dispose ( LObject *object )
   tree->hooks = NULL;
   g_list_free_full(tree->clients, (GDestroyNotify) lpt_client_free);
   tree->clients = NULL;
+  if (tree->destroy_handler_data) {
+    tree->destroy_handler_data(tree->handler_data);
+    tree->destroy_handler_data = NULL;
+  }
+  tree->handler_data = NULL;
   /* [FIXME] */
   ((LObjectClass *) parent_class)->dispose(object);
 }
@@ -176,6 +181,21 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
   hook->data = data;
   tree->hooks = g_list_append(tree->hooks, hook);
   return hook;
+}
+
+
+
+/* lpt_tree_set_message_handler:
+ */
+void lpt_tree_set_message_handler ( LptTree *tree,
+                                    LptMessageHandler handler,
+                                    gpointer data,
+                                    GDestroyNotify destroy_data )
+{
+  /* [FIXME] destroy old data */
+  tree->handler = handler;
+  tree->handler_data = data;
+  tree->destroy_handler_data = destroy_data;
 }
 
 

@@ -35,9 +35,28 @@ teardown
   l_trash_pop();
 }
 
+header
+{
+  static void message_handler ( LptTree *tree,
+                                LptClient *client,
+                                LObject *message,
+                                gpointer data )
+  {
+    fprintf(stderr, "\n[TODO] message_handler: %s\n", l_object_to_string(message));
+  }
+}
+
 test
 {
   LptClient *c1_t2, *c2_t1;
+  GHashTable *t1_cmap, *t2_cmap;
+  /* setup the handlers */
+  t1_cmap = g_hash_table_new(NULL, NULL);
+  t2_cmap = g_hash_table_new(NULL, NULL);
+  lpt_tree_set_message_handler(data->t1, message_handler, 
+                               t1_cmap, (GDestroyNotify) g_hash_table_unref);
+  lpt_tree_set_message_handler(data->t2, message_handler,
+                               t2_cmap, (GDestroyNotify) g_hash_table_unref);
   /* setup the shares */
   lpt_tree_create_share(data->t1, "SHARE1", "/share1", 0);
   /* create the clients */
