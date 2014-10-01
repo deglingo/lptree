@@ -88,13 +88,26 @@ LObject *lpt_node_get_value ( LptNode *node )
 
 
 
+static void _fix_tree ( LptNode *node,
+                        LptTree *tree )
+{
+  ASSERT(!node->tree);
+  node->tree = tree;
+  lpt_node_foreach(node, (LptForeachFunc) _fix_tree, tree);
+}
+
+
+
 /* lpt_node_add:
  */
 void lpt_node_add ( LptNode *node,
                     LptNode *child,
                     LObject *key )
 {
+  ASSERT(!child->tree);
   ASSERT(L_IS_STRING(key));
+  if (node->tree)
+    _fix_tree(child, node->tree);
   child->key = l_object_ref(key);
   node->children = g_list_append(node->children,
                                  l_object_ref(child));

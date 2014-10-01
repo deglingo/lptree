@@ -1,6 +1,7 @@
 /* -*- c -*- */
 
 header {
+##include "test/lptcheck.h"
 ##include "lptree/lptree.h"
 }
 
@@ -73,7 +74,22 @@ unit
     PIF_CHECK_EQ_PTR
       (lpt_tree_get_node(data->tree, "/b/b"), n_bb);
     /* make sure all nodes are attached to the tree */
+    PIF_CHECK_EQ_PTR(lpt_node_get_tree(n_a), data->tree);
+    PIF_CHECK_EQ_PTR(lpt_node_get_tree(n_aa), data->tree);
+    PIF_CHECK_EQ_PTR(lpt_node_get_tree(n_ab), data->tree);
+    PIF_CHECK_EQ_PTR(lpt_node_get_tree(n_b), data->tree);
+    PIF_CHECK_EQ_PTR(lpt_node_get_tree(n_ba), data->tree);
+    PIF_CHECK_EQ_PTR(lpt_node_get_tree(n_bb), data->tree);
+  }
 
+  test add_subtree
+  {
+    LptNode *n1, *n2;
+    n1 = L_TRASH_OBJECT(lpt_node_new(data->nspec_dir));
+    n2 = L_TRASH_OBJECT(lpt_node_new(data->nspec_dir));
+    lpt_node_add(n1, n2, L_TRASH_OBJECT(l_string_new("n2")));
+    lpt_node_add(data->tree->root, n1, L_TRASH_OBJECT(l_string_new("n1")));
+    check_node_tree(data->tree->root, data->tree);
   }
 
   header
