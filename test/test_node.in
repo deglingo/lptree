@@ -1,9 +1,53 @@
 /* -*- c -*- */
 
-header {
+header
+{
 ##include "lptree/lptnspecint.h"
 ##include "lptree/lptnspecdir.h"
 ##include "lptree/lptnode.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
+}
+
+unit node_dir
+{
+  data
+    {
+      LptNSpec *ns_dir;
+    }
+
+  setup
+    {
+      data->ns_dir = L_TRASH_OBJECT
+        (lpt_nspec_dir_new("DIR"));
+    }
+
+  test
+    {
+      LptNode *nroot, *n[10];
+      LObject *k[10];
+      guint i;
+      nroot = L_TRASH_OBJECT(lpt_node_new(data->ns_dir));
+      for (i = 0; i < 10; i++) {
+        gchar name[10];
+        sprintf(name, "child%d", i);
+        k[i] = L_TRASH_OBJECT(l_string_new(name));
+        n[i] = L_TRASH_OBJECT(lpt_node_new(data->ns_dir));
+        lpt_node_add(nroot, n[i], k[i]);
+      }
+      for (i = 0; i < 10; i++) {
+        PIF_CHECK_EQ_PTR(lpt_node_get_child(nroot, k[i]), n[i]);
+        /* [TODO] PIF_CHECK_EQ_PTR(lpt_node_get_key(n[i]), k[i]); */
+      }
+    }
 }
 
 unit /* node-int */
