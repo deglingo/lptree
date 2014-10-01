@@ -7,11 +7,12 @@ suite = lptree-test
 modules =
   test_base
   test_path
-  test_tree
   test_nspec
   test_nspecint
   test_nspecdir
   test_node
+  test_tree
+  test_treesync
   test_proxy
 
 cflags = -I@top_srcdir@ -I@top_builddir@ @PIFTEST_CFLAGS@ @LOS_CFLAGS@

@@ -11,6 +11,7 @@
 
 
 
+typedef struct _LptClient LptClient;
 typedef struct _LptHook LptHook;
 typedef gboolean (* LptHookFunc) ( LptEvent *event,
                                    gpointer data );
@@ -35,6 +36,7 @@ struct _LptTree
 
   LptNode *root;
   GList *hooks;
+  GList *clients;
 };
 
 
@@ -59,6 +61,10 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
                              LptHookFlags flags,
                              gpointer data,
                              GDestroyNotify destroy_data );
+
+/* sync */
+LptClient *lpt_tree_add_client ( LptTree *tree,
+                                 const gchar *name );
 
 /* private */
 void _lpt_tree_set_node_value ( LptTree *tree,

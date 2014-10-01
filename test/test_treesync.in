@@ -1,0 +1,23 @@
+/* -*- c -*- */
+
+header
+{
+##include "lptree/lpttree.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
+}
+
+test add_client
+{
+  LptTree *tree = L_TRASH_OBJECT(lpt_tree_new());
+  LptClient *client = lpt_tree_add_client(tree, "test-client");
+  PIF_CHECK(client);
+}

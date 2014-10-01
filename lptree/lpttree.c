@@ -9,6 +9,15 @@
 
 
 
+/* LptClient:
+ */
+struct _LptClient
+{
+  gchar *name;
+};
+
+
+
 /* LptHook:
  */
 struct _LptHook
@@ -20,6 +29,27 @@ struct _LptHook
 
 
 static void _dispose ( LObject *object );
+
+
+
+/* lpt_client_new:
+ */
+static LptClient *lpt_client_new ( const gchar *name )
+{
+  LptClient *client = g_new0(LptClient, 1);
+  client->name = g_strdup(name);
+  return client;
+}
+
+
+
+/* lpt_client_free:
+ */
+static void lpt_client_free ( LptClient *client )
+{
+  g_free(client->name);
+  g_free(client);
+}
 
 
 
@@ -74,6 +104,8 @@ static void _dispose ( LObject *object )
   L_OBJECT_CLEAR(tree->root);
   g_list_free_full(tree->hooks, (GDestroyNotify) lpt_hook_free);
   tree->hooks = NULL;
+  g_list_free_full(tree->clients, (GDestroyNotify) lpt_client_free);
+  tree->clients = NULL;
   /* [FIXME] */
   ((LObjectClass *) parent_class)->dispose(object);
 }
@@ -144,6 +176,18 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
   hook->data = data;
   tree->hooks = g_list_append(tree->hooks, hook);
   return hook;
+}
+
+
+
+/* lpt_tree_add_client:
+ */
+LptClient *lpt_tree_add_client ( LptTree *tree,
+                                 const gchar *name )
+{
+  LptClient *client = lpt_client_new(name);
+  tree->clients = g_list_append(tree->clients, client);
+  return client;
 }
 
 
