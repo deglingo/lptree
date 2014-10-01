@@ -206,8 +206,8 @@ static LTuple *_get_ntree ( LptProxy *proxy,
                             LDict *nspec_map,
                             LList *nspec_list )
 {
-  /* node tuple: (nid, nspecid, key, children) */ 
-  LTuple *ntree = l_tuple_new(4);
+  /* node tuple: (nid, nspecid, key, value, children) */ 
+  LTuple *ntree = l_tuple_new(5);
   LTuple *children;
   LptNSpec *nspec = lpt_node_get_nspec(node);
   LInt *nspecid = l_int_new(lpt_nspec_get_id(nspec));
@@ -223,6 +223,13 @@ static LTuple *_get_ntree ( LptProxy *proxy,
   l_tuple_give_item(ntree, 0, L_OBJECT(l_int_new(0))); /* [fixme] */
   l_tuple_give_item(ntree, 1, l_object_ref(nspecid));
   l_tuple_give_item(ntree, 2, l_object_ref(node->key));
+  /* value */
+  if (lpt_nspec_get_value_type(nspec)) {
+    l_tuple_give_item(ntree, 3, l_object_ref(lpt_node_get_value(node)));;
+  } else {
+    l_tuple_give_item(ntree, 3, L_OBJECT(l_none_ref()));
+  }
+  /* children */
   children = l_tuple_new(lpt_node_get_n_children(node));
   data.proxy = proxy;
   data.children = children;
@@ -230,7 +237,7 @@ static LTuple *_get_ntree ( LptProxy *proxy,
   data.nspec_map = nspec_map;
   data.nspec_list = nspec_list;
   lpt_node_foreach(node, _get_ntree_child, &data);
-  l_tuple_give_item(ntree, 3, L_OBJECT(children));
+  l_tuple_give_item(ntree, 4, L_OBJECT(children));
   l_object_unref(nspecid);
   return ntree;
 }
@@ -303,12 +310,13 @@ static void _create_ntree ( LptProxy *proxy,
 {
   LptNSpec *nspec;
   guint c;
-  LObject *nid, *nsid, *key, *children;
+  LObject *nid, *nsid, *key, *value, *children;
   /* CL_ERROR("ntree: %s", l_object_to_string(L_OBJECT(ntree))); */
   nid = L_TUPLE_ITEM(ntree, 0);
   nsid = L_TUPLE_ITEM(ntree, 1);
   key = L_TUPLE_ITEM(ntree, 2);
-  children = L_TUPLE_ITEM(ntree, 3);
+  value = L_TUPLE_ITEM(ntree, 3);
+  children = L_TUPLE_ITEM(ntree, 4);
   nspec = LPT_NSPEC(l_dict_lookup(proxy->nspecs, nsid));
   ASSERT(nspec);
   if (!base)
@@ -322,6 +330,9 @@ static void _create_ntree ( LptProxy *proxy,
       base = node;
       l_object_unref(node);
     }
+  /* set value */
+  if (lpt_nspec_get_value_type(nspec))
+    lpt_node_set_value(base, value);
   /* l_object_unref(nspec); */
   for (c = 0; c < L_TUPLE_SIZE(children); c++)
     _create_ntree(proxy, share, L_TUPLE(L_TUPLE_ITEM(children, c)), base);

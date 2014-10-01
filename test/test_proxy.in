@@ -3,6 +3,7 @@
 header
 {
 ##include "lptree/lptree.h"
+##include <los/lostest.h>
 }
 
 header
@@ -105,6 +106,7 @@ header
 
   static LptProxy *_setup_server_proxy ( GHashTable *cmap )
   {
+    LptNode *n1;
     LptNSpec *ns_dir = L_TRASH_OBJECT
       (lpt_nspec_dir_new("DIR"));
     LptNSpec *ns_int = L_TRASH_OBJECT
@@ -112,7 +114,8 @@ header
     LptTree *tree = L_TRASH_OBJECT
       (lpt_tree_new());
     lpt_tree_create_node(tree, "/share1", ns_dir);
-    lpt_tree_create_node(tree, "/share1/node1", ns_int);
+    n1 = lpt_tree_create_node(tree, "/share1/node1", ns_int);
+    lpt_node_set_value(n1, L_TRASH_OBJECT(l_int_new(2)));
     return L_TRASH_OBJECT
       (lpt_proxy_new(tree, _proxy_handler, cmap));
   }
@@ -133,10 +136,11 @@ header
     PIF_CHECK(LPT_IS_NSPEC_DIR(lpt_node_get_nspec(n))); \
   } while (0)
 
-#define CHECK_NODE_INT(n_) do {                         \
+#define CHECK_NODE_INT(n_, val) do {                    \
     LptNode *n = (n_);                                  \
     PIF_CHECK(n);                                       \
     PIF_CHECK(LPT_IS_NSPEC_INT(lpt_node_get_nspec(n))); \
+    LOS_CHECK_INT(lpt_node_get_value(n), (val));        \
   } while (0)
 
 test new_complete
@@ -155,6 +159,10 @@ test new_complete
   /* connect client to server's share */
   lpt_proxy_connect_share(proxy2, p2_p1, "SHARE1", "/dest-share1", 0);
   /* check the result */
-  CHECK_NODE_DIR(lpt_tree_get_node(proxy2->tree, "/dest-share1"));
-  CHECK_NODE_INT(lpt_tree_get_node(proxy2->tree, "/dest-share1/node1"));
+  {
+    LptNode *nroot = lpt_tree_get_node(proxy2->tree, "/dest-share1");
+    LptNode *n1 = lpt_tree_get_node(proxy2->tree, "/dest-share1/node1");
+    CHECK_NODE_DIR(nroot);
+    CHECK_NODE_INT(n1, 2);
+  }
 }
