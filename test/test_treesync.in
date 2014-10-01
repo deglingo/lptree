@@ -47,7 +47,7 @@ header
     LptClient *dest_client;
     dest_client = g_hash_table_lookup(cmap, client);
     ASSERT(dest_client);
-    fprintf(stderr, "\n[FIXME] message_handler: %s\n", l_object_to_string(message));
+    /* fprintf(stderr, "\n[FIXME] message_handler: %s\n", l_object_to_string(message)); */
     lpt_tree_handle_message(lpt_client_get_tree(dest_client),
                             dest_client, message);
   }

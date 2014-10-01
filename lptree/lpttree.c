@@ -275,6 +275,17 @@ static void _handle_connect_request ( LptTree *tree,
 
 
 
+/* _handle_connect_accept:
+ */
+static void _handle_connect_accept ( LptTree *tree,
+                                      LptClient *client,
+                                      LObject *message )
+{
+  CL_DEBUG("[TODO] connect-accept");
+}
+
+
+
 /* lpt_tree_handle_message:
  */
 void lpt_tree_handle_message ( LptTree *tree,
@@ -292,6 +303,9 @@ void lpt_tree_handle_message ( LptTree *tree,
     {
     case LPT_MESSAGE_CONNECT_REQUEST:
       _handle_connect_request(tree, client, message);
+      break;
+    case LPT_MESSAGE_CONNECT_ACCEPT:
+      _handle_connect_accept(tree, client, message);
       break;
     default:
       CL_DEBUG("[TODO] message: %s", l_object_to_string(message));
