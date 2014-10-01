@@ -3,11 +3,31 @@
 header
 {
 ##include "lptree/lpttree.h"
+##include "lptree/lptnspecdir.h"
+##include "lptree/lptnspecint.h"
+}
+
+data
+{
+  LptTree *t1, *t2;
+  LptNSpec *ns_dir, *ns_int;
 }
 
 setup
 {
   l_trash_push();
+  data->ns_dir = L_TRASH_OBJECT
+    (lpt_nspec_dir_new("DIR"));
+  data->ns_int = L_TRASH_OBJECT
+    (lpt_nspec_int_new("INT", G_MININT, G_MAXINT, 0));
+  /* tree 1 */
+  data->t1 = L_TRASH_OBJECT
+    (lpt_tree_new());
+  lpt_tree_create_node(data->t1, "/share1", data->ns_dir);
+  lpt_tree_create_node(data->t1, "/share1/node1", data->ns_int);
+  /* tree 2 */
+  data->t2 = L_TRASH_OBJECT
+    (lpt_tree_new());
 }
 
 teardown
@@ -15,9 +35,12 @@ teardown
   l_trash_pop();
 }
 
-test add_client
+test
 {
-  LptTree *tree = L_TRASH_OBJECT(lpt_tree_new());
-  LptClient *client = lpt_tree_add_client(tree, "test-client");
-  PIF_CHECK(client);
+  LptClient *c1_t2, *c2_t1;
+  /* setup the shares */
+  lpt_tree_create_share(data->t1, "SHARE1", "/share1", 0);
+  /* create the clients */
+  PIF_CHECK((c1_t2 = lpt_tree_add_client(data->t1, "t2")));
+  PIF_CHECK((c2_t1 = lpt_tree_add_client(data->t2, "t1")));
 }

@@ -180,6 +180,17 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
 
 
 
+/* lpt_tree_create_share:
+ */
+void lpt_tree_create_share ( LptTree *tree,
+                             const gchar *name,
+                             const gchar *path,
+                             guint flags )
+{
+}
+
+
+
 /* lpt_tree_add_client:
  */
 LptClient *lpt_tree_add_client ( LptTree *tree,

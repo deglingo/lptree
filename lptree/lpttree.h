@@ -63,6 +63,10 @@ LptHook *lpt_tree_add_hook ( LptTree *tree,
                              GDestroyNotify destroy_data );
 
 /* sync */
+void lpt_tree_create_share ( LptTree *tree,
+                             const gchar *name,
+                             const gchar *path,
+                             guint flags );
 LptClient *lpt_tree_add_client ( LptTree *tree,
                                  const gchar *name );
 
