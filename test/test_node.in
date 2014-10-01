@@ -5,6 +5,7 @@ header
 ##include "lptree/lptnspecint.h"
 ##include "lptree/lptnspecdir.h"
 ##include "lptree/lptnode.h"
+##include <los/lostest.h>
 }
 
 setup
@@ -50,6 +51,28 @@ unit node_dir
     }
 }
 
+unit node_int
+{
+  data
+    {
+      LptNSpec *ns_int;
+    }
+
+  setup
+    {
+      data->ns_int = L_TRASH_OBJECT
+        (lpt_nspec_int_new("INT", -5, 5, 2));
+    }
+
+  test
+    {
+      LptNode *n = lpt_node_new(data->ns_int);
+      PIF_CHECK(n);
+      LOS_CHECK_INT(lpt_node_get_value(n), 2);
+    }
+}
+
+/* [REMOVEME] */
 unit /* node-int */
 {
   data {

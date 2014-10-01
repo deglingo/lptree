@@ -26,10 +26,8 @@ static void lpt_node_class_init ( LObjectClass *cls )
  */
 LptNode *lpt_node_new ( LptNSpec *nspec )
 {
-  LptNode *node;
-  node = LPT_NODE(l_object_new(LPT_CLASS_NODE, NULL));
-  node->nspec = l_object_ref(nspec);
-  return node;
+  ASSERT(LPT_NSPEC_GET_CLASS(nspec)->create_node);
+  return LPT_NSPEC_GET_CLASS(nspec)->create_node(nspec);
 }
 
 

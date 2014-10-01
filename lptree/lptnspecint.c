@@ -3,6 +3,7 @@
 
 #include "lptree/private.h"
 #include "lptree/lptnspecint.h"
+#include "lptree/lptnode.h"
 #include "lptree/lptnspecint.inl"
 
 
@@ -10,6 +11,7 @@
 static LObject *_get_state ( LObject *object );
 static LObject *_from_state ( LObjectClass *cls,
                               LObject *state );
+static LptNode *_create_node ( LptNSpec *nspec );
 
 
 
@@ -19,6 +21,7 @@ static void lpt_nspec_int_class_init ( LObjectClass *cls )
 {
   cls->get_state = _get_state;
   cls->from_state = _from_state;
+  LPT_NSPEC_CLASS(cls)->create_node = _create_node;
 }
 
 
@@ -70,4 +73,16 @@ static LObject *_from_state ( LObjectClass *cls,
   LPT_NSPEC_INT(nspec)->maxi = L_INT_VALUE(L_TUPLE_ITEM(state, 2));
   LPT_NSPEC_INT(nspec)->defo = L_INT_VALUE(L_TUPLE_ITEM(state, 3));
   return nspec;
+}
+
+
+
+/* _create_node:
+ */
+static LptNode *_create_node ( LptNSpec *nspec )
+{
+  LptNode *n = LPT_NODE(l_object_new(LPT_CLASS_NODE, NULL));
+  n->nspec = l_object_ref(nspec);
+  n->value = L_OBJECT(l_int_new(LPT_NSPEC_INT(nspec)->defo));
+  return n;
 }

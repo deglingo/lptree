@@ -9,7 +9,9 @@ namespace Lpt
   class NSpecInt : NSpec {
     void class_init ();
   };
-  class NSpecDir : NSpec;
+  class NSpecDir : NSpec {
+    void class_init ();
+  };
   class Node {
     void class_init ();
   };

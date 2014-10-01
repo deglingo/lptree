@@ -7,6 +7,8 @@
 #include "lptree/lptbase.h"
 #include "lptree/lptnspec-def.h"
 
+struct _LptNode;
+
 
 
 /* LptNSpec:
@@ -26,6 +28,8 @@ struct _LptNSpec
 struct _LptNSpecClass
 {
   LPT_NSPEC_CLASS_HEADER;
+
+  struct _LptNode * (* create_node) ( LptNSpec *nspec );
 };
 
 
