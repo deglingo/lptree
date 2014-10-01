@@ -22,6 +22,7 @@ teardown
 test {
   PIF_CHECK(data->nspec);
   PIF_CHECK(lpt_nspec_get_id(data->nspec)); /* ?? */
+  PIF_CHECK_EQ_PTR(lpt_nspec_get_value_type(data->nspec), NULL);
   PIF_CHECK(!strcmp(data->nspec->name, "test-dir"));
 }
 

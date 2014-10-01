@@ -79,3 +79,12 @@ guint lpt_nspec_get_id ( LptNSpec *nspec )
 {
   return nspec->nsid;
 }
+
+
+
+/* lpt_nspec_get_value_type:
+ */
+LObjectClass *lpt_nspec_get_value_type ( LptNSpec *nspec )
+{
+  return LPT_NSPEC_GET_CLASS(nspec)->value_type;
+}

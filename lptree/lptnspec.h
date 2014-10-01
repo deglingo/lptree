@@ -29,12 +29,15 @@ struct _LptNSpecClass
 {
   LPT_NSPEC_CLASS_HEADER;
 
+  LObjectClass *value_type;
+
   struct _LptNode * (* create_node) ( LptNSpec *nspec );
 };
 
 
 
 guint lpt_nspec_get_id ( LptNSpec *nspec );
+LObjectClass *lpt_nspec_get_value_type ( LptNSpec *nspec );
 
 
 

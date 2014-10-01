@@ -21,6 +21,7 @@ static void lpt_nspec_int_class_init ( LObjectClass *cls )
 {
   cls->get_state = _get_state;
   cls->from_state = _from_state;
+  LPT_NSPEC_CLASS(cls)->value_type = l_object_ref(L_CLASS_INT);
   LPT_NSPEC_CLASS(cls)->create_node = _create_node;
 }
 
