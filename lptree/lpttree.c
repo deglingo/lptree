@@ -46,7 +46,9 @@ struct _LptHook
 typedef struct _LptShare
 {
   guint shareid;
+  gchar *name;
   gchar *path;
+  LptNode *root;
 }
   LptShare;
 
@@ -101,10 +103,12 @@ static void lpt_hook_free ( LptHook *hook )
 
 /* lpt_share_new:
  */
-static LptShare *lpt_share_new ( const gchar *path )
+static LptShare *lpt_share_new ( const gchar *name,
+                                 const gchar *path )
 {
   LptShare *share = g_new0(LptShare, 1);
   share->shareid = g_atomic_int_add(&shareid_counter, 1);
+  if (name) share->name = g_strdup(name);
   share->path = g_strdup(path);
   return share;
 }
@@ -115,6 +119,7 @@ static LptShare *lpt_share_new ( const gchar *path )
  */
 static void lpt_share_free ( LptShare *share )
 {
+  g_free(share->name);
   g_free(share->path);
   g_free(share);
 }
@@ -141,6 +146,7 @@ LptTree *lpt_tree_new ( void )
   /* [fixme] ?? */
   tree->root->tree = tree;
   tree->shares_by_id = g_hash_table_new(NULL, NULL);
+  tree->shares_by_name = g_hash_table_new(g_str_hash, g_str_equal);
   l_object_unref(nspec);
   return tree;
 }
@@ -161,6 +167,8 @@ static void _dispose ( LObject *object )
   tree->shares = NULL;
   g_hash_table_unref(tree->shares_by_id);
   tree->shares_by_id = NULL;
+  g_hash_table_unref(tree->shares_by_name);
+  tree->shares_by_name = NULL;
   if (tree->destroy_handler_data) {
     tree->destroy_handler_data(tree->handler_data);
     tree->destroy_handler_data = NULL;
@@ -288,12 +296,100 @@ static void _unpack_message ( LObject *message,
     switch (*f) {
     case 'i': ASSERT(L_IS_INT(*item)); break;
     case 's': ASSERT(L_IS_STRING(*item)); break;
+    case 't': ASSERT(L_IS_TUPLE(*item)); break;
     default: CL_ERROR("bad format: '%c'", *f);
     }
   }
   item = va_arg(args, LObject **);
   ASSERT(!item);
   va_end(args);
+}
+
+
+
+struct pack_ntree_data
+{
+  LptTree *tree;
+  LTuple *children;
+  guint n_children;
+};
+
+
+
+static void _pack_ntree_child ( LptNode *node,
+                                gpointer data_ )
+{
+  struct pack_ntree_data *data = data_;
+  /* pack tuple: ( nid, nspec, key, value, children ) */
+  LTuple *pack = l_tuple_new(5);
+  LTuple *children, *data_children;
+  guint data_n_children;
+  l_tuple_give_item(pack, 0, L_OBJECT(l_int_new(0))); /* nid */
+  l_tuple_give_item(pack, 1, L_OBJECT(l_int_new(0))); /* nspecid */
+  l_tuple_give_item(pack, 2, l_object_ref(node->key));
+  l_tuple_give_item(pack, 3, L_OBJECT(l_int_new(0))); /* value */
+  children = l_tuple_new(lpt_node_get_n_children(node));
+  data_children = data->children;
+  data_n_children = data->n_children;
+  data->children = children;
+  data->n_children = 0;
+  lpt_node_foreach(node, _pack_ntree_child, data);
+  l_tuple_give_item(pack, 4, L_OBJECT(children));
+  data->children = data_children;
+  data->n_children = data_n_children;
+  l_tuple_give_item(data->children, data->n_children++, L_OBJECT(pack));
+}
+
+
+
+static LObject *_pack_ntree ( LptTree *tree,
+                              LptNode *node )
+{
+  struct pack_ntree_data data;
+  LObject *pack;
+  data.tree = tree;
+  data.children = l_tuple_new(1);
+  data.n_children = 0;
+  _pack_ntree_child(node, &data);
+  pack = l_object_ref(L_TUPLE_ITEM(data.children, 0));
+  l_object_unref(data.children);
+  return pack;
+}
+
+
+
+static void _unpack_ntree ( LptTree *tree,
+                            LptShare *share,
+                            LptNode *base,
+                            LTuple *ntree )
+{
+  LInt *nid, *nspecid;
+  LObject *key, *value;
+  LTuple *children;
+  LptNSpec *nspec = lpt_nspec_dir_new("DIR");
+  guint i;
+  ASSERT(L_TUPLE_SIZE(ntree) == 5);
+  nid = L_INT(L_TUPLE_ITEM(ntree, 0));
+  nspecid = L_INT(L_TUPLE_ITEM(ntree, 1));
+  key = L_TUPLE_ITEM(ntree, 2);
+  value = L_TUPLE_ITEM(ntree, 3);
+  children = L_TUPLE(L_TUPLE_ITEM(ntree, 4));
+  if (!base)
+    {
+      base = lpt_tree_create_node(tree, share->path, nspec);
+    }
+  else
+    {
+      LptNode *node = lpt_node_new(nspec);
+      lpt_node_add(base, node, key);
+      l_object_unref(node);
+      base = node;
+    }
+  /* children */
+  for (i = 0; i < L_TUPLE_SIZE(children); i++)
+    _unpack_ntree(tree, share, base, L_TUPLE(L_TUPLE_ITEM(children, i)));
+  /* [fixme] */
+  l_object_unref(nspec);
 }
 
 
@@ -307,10 +403,17 @@ static void _handle_connect_request ( LptTree *tree,
   LInt *shareid;
   LString *name;
   LTuple *answer;
+  LObject *ntree;
+  LptShare *share;
   _unpack_message(message, "is", &shareid, &name, NULL);
-  answer = l_tuple_new(2);
+  share = g_hash_table_lookup(tree->shares_by_name, L_STRING(name)->str);
+  ASSERT(share);
+  ntree = _pack_ntree(tree, share->root);
+  answer = l_tuple_new(4);
   l_tuple_give_item(answer, 0, L_OBJECT(l_int_new(LPT_MESSAGE_CONNECT_ACCEPT)));
   l_tuple_give_item(answer, 1, l_object_ref(shareid));
+  l_tuple_give_item(answer, 2, L_OBJECT(l_tuple_new(0))); /* nspecs */
+  l_tuple_give_item(answer, 3, ntree);
   tree->handler(tree, client, L_OBJECT(answer), tree->handler_data);
   l_object_unref(answer);
 }
@@ -324,17 +427,14 @@ static void _handle_connect_accept ( LptTree *tree,
                                       LObject *message )
 {
   LInt *shareid;
+  LTuple *nspecs, *ntree;
   LptShare *share;
-  _unpack_message(message, "i", &shareid, NULL);
+  /* CL_DEBUG("connect_accept: %s", l_object_to_string(message)); */
+  _unpack_message(message, "itt", &shareid, &nspecs, &ntree, NULL);
   share = g_hash_table_lookup(tree->shares_by_id,
                               GUINT_TO_POINTER(L_INT_VALUE(shareid)));
   ASSERT(share);
-  /* [fixme] */
-  {
-    LptNSpec *nspec = lpt_nspec_dir_new("DIR");
-    lpt_tree_create_node(tree, share->path, nspec);
-    l_object_unref(nspec);
-  }
+  _unpack_ntree(tree, share, NULL, ntree);
 }
 
 
@@ -374,6 +474,13 @@ void lpt_tree_create_share ( LptTree *tree,
                              const gchar *path,
                              guint flags )
 {
+  LptShare *share;
+  share = lpt_share_new(name, path);
+  share->root = lpt_tree_get_node(tree, path); /* [fixme] ref ? */
+  ASSERT(share->root);
+  tree->shares = g_list_append(tree->shares, share);
+  g_hash_table_insert(tree->shares_by_id, GUINT_TO_POINTER(share->shareid), share);
+  g_hash_table_insert(tree->shares_by_name, share->name, share);
 }
 
 
@@ -388,7 +495,7 @@ void lpt_tree_connect_share ( LptTree *tree,
 {
   LTuple *msg;
   LptShare *share;
-  share = lpt_share_new(dest_path);
+  share = lpt_share_new(NULL /* ?? */, dest_path);
   tree->shares = g_list_append(tree->shares, share);
   g_hash_table_insert(tree->shares_by_id,
                       GUINT_TO_POINTER(share->shareid),

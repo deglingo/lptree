@@ -44,7 +44,8 @@ struct _LptTree
   GList *hooks;
   GList *clients;
   GList *shares;
-  GHashTable *shares_by_id; /* map < guint shareid, LptShare* > */
+  GHashTable *shares_by_id; /* map < guint shareid, LptShare * > */
+  GHashTable *shares_by_name; /* map < gchar *name, LptShare * > */
   LptMessageHandler handler;
   gpointer handler_data;
   GDestroyNotify destroy_handler_data;
