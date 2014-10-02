@@ -41,6 +41,19 @@ struct _LptHook
 
 
 
+/* LptShare:
+ */
+typedef struct _LptShare
+{
+  guint shareid;
+  gchar *path;
+}
+  LptShare;
+
+static volatile guint shareid_counter = 1;
+
+
+
 static void _dispose ( LObject *object );
 
 
@@ -86,6 +99,28 @@ static void lpt_hook_free ( LptHook *hook )
 
 
 
+/* lpt_share_new:
+ */
+static LptShare *lpt_share_new ( const gchar *path )
+{
+  LptShare *share = g_new0(LptShare, 1);
+  share->shareid = g_atomic_int_add(&shareid_counter, 1);
+  share->path = g_strdup(path);
+  return share;
+}
+
+
+
+/* lpt_share_free:
+ */
+static void lpt_share_free ( LptShare *share )
+{
+  g_free(share->path);
+  g_free(share);
+}
+
+
+
 /* lpt_tree_class_init:
  */
 static void lpt_tree_class_init ( LObjectClass *cls )
@@ -105,6 +140,7 @@ LptTree *lpt_tree_new ( void )
   tree->root = lpt_node_new(nspec);
   /* [fixme] ?? */
   tree->root->tree = tree;
+  tree->shares_by_id = g_hash_table_new(NULL, NULL);
   l_object_unref(nspec);
   return tree;
 }
@@ -121,6 +157,10 @@ static void _dispose ( LObject *object )
   tree->hooks = NULL;
   g_list_free_full(tree->clients, (GDestroyNotify) lpt_client_free);
   tree->clients = NULL;
+  g_list_free_full(tree->shares, (GDestroyNotify) lpt_share_free);
+  tree->shares = NULL;
+  g_hash_table_unref(tree->shares_by_id);
+  tree->shares_by_id = NULL;
   if (tree->destroy_handler_data) {
     tree->destroy_handler_data(tree->handler_data);
     tree->destroy_handler_data = NULL;
@@ -246,6 +286,7 @@ static void _unpack_message ( LObject *message,
     item = va_arg(args, LObject **);
     *item = L_TUPLE_ITEM(message, i);
     switch (*f) {
+    case 'i': ASSERT(L_IS_INT(*item)); break;
     case 's': ASSERT(L_IS_STRING(*item)); break;
     default: CL_ERROR("bad format: '%c'", *f);
     }
@@ -263,12 +304,13 @@ static void _handle_connect_request ( LptTree *tree,
                                       LptClient *client,
                                       LObject *message )
 {
+  LInt *shareid;
   LString *name;
   LTuple *answer;
-  _unpack_message(message, "s", &name, NULL);
+  _unpack_message(message, "is", &shareid, &name, NULL);
   answer = l_tuple_new(2);
   l_tuple_give_item(answer, 0, L_OBJECT(l_int_new(LPT_MESSAGE_CONNECT_ACCEPT)));
-  l_tuple_give_item(answer, 1, l_object_ref(name));
+  l_tuple_give_item(answer, 1, l_object_ref(shareid));
   tree->handler(tree, client, L_OBJECT(answer), tree->handler_data);
   l_object_unref(answer);
 }
@@ -281,7 +323,18 @@ static void _handle_connect_accept ( LptTree *tree,
                                       LptClient *client,
                                       LObject *message )
 {
-  CL_DEBUG("[TODO] connect-accept");
+  LInt *shareid;
+  LptShare *share;
+  _unpack_message(message, "i", &shareid, NULL);
+  share = g_hash_table_lookup(tree->shares_by_id,
+                              GUINT_TO_POINTER(L_INT_VALUE(shareid)));
+  ASSERT(share);
+  /* [fixme] */
+  {
+    LptNSpec *nspec = lpt_nspec_dir_new("DIR");
+    lpt_tree_create_node(tree, share->path, nspec);
+    l_object_unref(nspec);
+  }
 }
 
 
@@ -334,9 +387,16 @@ void lpt_tree_connect_share ( LptTree *tree,
                               guint flags )
 {
   LTuple *msg;
-  msg = l_tuple_new(2);
+  LptShare *share;
+  share = lpt_share_new(dest_path);
+  tree->shares = g_list_append(tree->shares, share);
+  g_hash_table_insert(tree->shares_by_id,
+                      GUINT_TO_POINTER(share->shareid),
+                      share);
+  msg = l_tuple_new(3);
   l_tuple_give_item(msg, 0, L_OBJECT(l_int_new(LPT_MESSAGE_CONNECT_REQUEST)));
-  l_tuple_give_item(msg, 1, L_OBJECT(l_string_new(name)));
+  l_tuple_give_item(msg, 1, L_OBJECT(l_int_new(share->shareid)));
+  l_tuple_give_item(msg, 2, L_OBJECT(l_string_new(name)));
   tree->handler(tree, client, L_OBJECT(msg), tree->handler_data);
   l_object_unref(msg);
 }

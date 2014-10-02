@@ -75,4 +75,5 @@ test
   g_hash_table_insert(t2_cmap, t2_c1, t1_c2);
   /* connection */
   lpt_tree_connect_share(data->t2, t2_c1, "SHARE1", "/dest-share1", 0);
+  PIF_CHECK(lpt_tree_get_node(data->t2, "/dest-share1"));
 }
