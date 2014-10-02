@@ -31,6 +31,13 @@ unit node_dir
         (lpt_nspec_dir_new("DIR"));
     }
 
+  test nid
+  {
+    LptNode *n = L_TRASH_OBJECT
+      (lpt_node_new(data->ns_dir));
+    PIF_CHECK(lpt_node_get_id(n));
+  }
+
   test
     {
       LptNode *nroot, *n[10];

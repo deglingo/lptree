@@ -23,6 +23,7 @@ struct _LptNode
 {
   LPT_NODE_INSTANCE_HEADER;
 
+  guint nid;
   struct _LptTree *tree;
   LptNSpec *nspec;
   LObject *key;
@@ -43,6 +44,7 @@ struct _LptNodeClass
 
 
 LptNode *lpt_node_new ( LptNSpec *nspec );
+guint lpt_node_get_id ( LptNode *node );
 struct _LptTree *lpt_node_get_tree ( LptNode *node );
 LptNSpec *lpt_node_get_nspec ( LptNode *node );
 void lpt_node_set_value ( LptNode *node,

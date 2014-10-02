@@ -14,6 +14,7 @@ namespace Lpt
   };
   class Node {
     void class_init ();
+    void init ();
   };
   class Tree {
     void class_init ();

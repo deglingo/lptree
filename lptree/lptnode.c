@@ -10,6 +10,8 @@
 
 
 
+static volatile guint nid_counter = 1;
+
 static void _dispose ( LObject *object );
 
 
@@ -19,6 +21,15 @@ static void _dispose ( LObject *object );
 static void lpt_node_class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
+}
+
+
+
+/* lpt_node_init:
+ */
+static void lpt_node_init ( LObject *obj )
+{
+  LPT_NODE(obj)->nid = g_atomic_int_add(&nid_counter, 1);
 }
 
 
@@ -44,6 +55,15 @@ static void _dispose ( LObject *object )
   g_list_free_full(node->children, l_object_unref);
   node->children = NULL;
   ((LObjectClass *) parent_class)->dispose(object);
+}
+
+
+
+/* lpt_node_get_id:
+ */
+guint lpt_node_get_id ( LptNode *node )
+{
+  return node->nid;
 }
 
 
