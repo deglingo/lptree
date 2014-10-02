@@ -30,6 +30,7 @@ struct _LptNode
   /* [REMOVEME] should go in NData */
   GList *children;
   LObject *value;
+  gpointer share; /* set by LptTree */
 };
 
 

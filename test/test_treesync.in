@@ -94,4 +94,8 @@ test
   lpt_tree_connect_share(data->t2, t2_c1, "SHARE1", "/dest-share1", 0);
   CHECK_NODE_DIR(lpt_tree_get_node(data->t2, "/dest-share1"));
   CHECK_NODE_INT(lpt_tree_get_node(data->t2, "/dest-share1/node1"), 2);
+  /* change some value */
+  lpt_node_set_value(lpt_tree_get_node(data->t1, "/share1/node1"),
+                     L_TRASH_OBJECT(l_int_new(3)));
+  CHECK_NODE_INT(lpt_tree_get_node(data->t2, "/dest-share1/node1"), 3);
 }
