@@ -60,6 +60,7 @@ LptNode *lpt_node_get_child ( LptNode *node,
 void lpt_node_foreach ( LptNode *node,
                         LptForeachFunc func,
                         gpointer data );
+void lpt_node_value_set ( LptNode *node );
 
 
 

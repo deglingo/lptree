@@ -13,9 +13,9 @@
 
 #include "lptree/lptnode.h"
 
-#include "lptree/lpttree.h"
+#include "lptree/lptevent.h"
 
-#include "lptree/lptproxy.h"
+#include "lptree/lpttree.h"
 
 
 #endif

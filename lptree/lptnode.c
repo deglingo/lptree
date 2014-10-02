@@ -10,6 +10,16 @@
 
 
 
+/* Signals:
+ */
+enum
+  {
+    SIG_VALUE_SET = 0,
+    SIG_COUNT,
+  };
+
+static LSignalID signals[SIG_COUNT] = { 0, };
+
 static volatile guint nid_counter = 1;
 
 static void _dispose ( LObject *object );
@@ -21,6 +31,9 @@ static void _dispose ( LObject *object );
 static void lpt_node_class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
+  signals[SIG_VALUE_SET] =
+    l_signal_new(cls,
+                 "value_set");
 }
 
 
@@ -169,4 +182,13 @@ void lpt_node_foreach ( LptNode *node,
     {
       func(LPT_NODE(l->data), data);
     }
+}
+
+
+
+/* lpt_node_value_set:
+ */
+void lpt_node_value_set ( LptNode *node )
+{
+  l_signal_emit(L_OBJECT(node), signals[SIG_VALUE_SET]);
 }

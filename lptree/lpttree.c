@@ -715,4 +715,6 @@ void _lpt_tree_set_node_value ( LptTree *tree,
           l_object_unref(msg);
         }
     }
+  /* signal */
+  lpt_node_value_set(node);
 }
