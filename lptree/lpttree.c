@@ -27,6 +27,10 @@ struct _LptClient
 {
   LptTree *tree;
   gchar *name;
+  /* nspecs which have been sent : map < LInt *nsid, LptNspec *nspec > */
+  LDict *sent_nspecs;
+  /* nspecs which have been received : same */
+  LDict *recv_nspecs;
 };
 
 
@@ -68,6 +72,8 @@ static LptClient *lpt_client_new ( LptTree *tree,
   LptClient *client = g_new0(LptClient, 1);
   client->tree = tree;
   client->name = g_strdup(name);
+  client->sent_nspecs = l_dict_new();
+  client->recv_nspecs = l_dict_new();
   return client;
 }
 
@@ -78,6 +84,8 @@ static LptClient *lpt_client_new ( LptTree *tree,
 static void lpt_client_free ( LptClient *client )
 {
   g_free(client->name);
+  l_object_unref(client->sent_nspecs);
+  l_object_unref(client->recv_nspecs);
   g_free(client);
 }
 
@@ -310,9 +318,23 @@ static void _unpack_message ( LObject *message,
 struct pack_ntree_data
 {
   LptTree *tree;
+  LDict *nspecs_map;
+  LList *nspecs;
   LTuple *children;
   guint n_children;
 };
+
+
+
+static LObject *_pack_nspec ( LptNSpec *nspec,
+                             LInt *nsid )
+{
+  LTuple *pack = l_tuple_new(3);
+  l_tuple_give_item(pack, 0, l_object_ref(nsid));
+  l_tuple_give_item(pack, 1, L_OBJECT(l_string_new(l_object_class_name(L_OBJECT_GET_CLASS(nspec)))));
+  l_tuple_give_item(pack, 2, l_object_get_state(L_OBJECT(nspec)));
+  return L_OBJECT(pack);
+}
 
 
 
@@ -324,8 +346,17 @@ static void _pack_ntree_child ( LptNode *node,
   LTuple *pack = l_tuple_new(5);
   LTuple *children, *data_children;
   guint data_n_children;
+  LInt *nsid;
+  /* nspec */
+  nsid = l_int_new(lpt_nspec_get_id(node->nspec));
+  if (!l_dict_lookup(data->nspecs_map, L_OBJECT(nsid))) {
+    LObject *pack = _pack_nspec(node->nspec, nsid);
+    l_list_append(data->nspecs, pack);
+    l_object_unref(pack);
+    l_dict_insert(data->nspecs_map, L_OBJECT(nsid), L_OBJECT(node->nspec)); /* [fixme] weakref !? */
+  }
   l_tuple_give_item(pack, 0, L_OBJECT(l_int_new(0))); /* nid */
-  l_tuple_give_item(pack, 1, L_OBJECT(l_int_new(0))); /* nspecid */
+  l_tuple_give_item(pack, 1, l_object_ref(nsid));
   l_tuple_give_item(pack, 2, l_object_ref(node->key));
   l_tuple_give_item(pack, 3, L_OBJECT(l_int_new(0))); /* value */
   children = l_tuple_new(lpt_node_get_n_children(node));
@@ -338,16 +369,22 @@ static void _pack_ntree_child ( LptNode *node,
   data->children = data_children;
   data->n_children = data_n_children;
   l_tuple_give_item(data->children, data->n_children++, L_OBJECT(pack));
+  /* cleanup */
+  l_object_unref(nsid);
 }
 
 
 
 static LObject *_pack_ntree ( LptTree *tree,
-                              LptNode *node )
+                              LptNode *node,
+                              LDict *nspecs_map,
+                              LList *nspecs )
 {
   struct pack_ntree_data data;
   LObject *pack;
   data.tree = tree;
+  data.nspecs_map = nspecs_map;
+  data.nspecs = nspecs;
   data.children = l_tuple_new(1);
   data.n_children = 0;
   _pack_ntree_child(node, &data);
@@ -359,21 +396,25 @@ static LObject *_pack_ntree ( LptTree *tree,
 
 
 static void _unpack_ntree ( LptTree *tree,
+                            LptClient *client,
                             LptShare *share,
                             LptNode *base,
                             LTuple *ntree )
 {
-  LInt *nid, *nspecid;
+  LInt *nid, *nsid;
   LObject *key, *value;
   LTuple *children;
-  LptNSpec *nspec = lpt_nspec_dir_new("DIR");
+  LptNSpec *nspec;
   guint i;
   ASSERT(L_TUPLE_SIZE(ntree) == 5);
   nid = L_INT(L_TUPLE_ITEM(ntree, 0));
-  nspecid = L_INT(L_TUPLE_ITEM(ntree, 1));
+  nsid = L_INT(L_TUPLE_ITEM(ntree, 1));
   key = L_TUPLE_ITEM(ntree, 2);
   value = L_TUPLE_ITEM(ntree, 3);
   children = L_TUPLE(L_TUPLE_ITEM(ntree, 4));
+  /* get nspec */
+  nspec = (LptNSpec *) l_dict_lookup(client->recv_nspecs, L_OBJECT(nsid));
+  ASSERT(nspec);
   if (!base)
     {
       base = lpt_tree_create_node(tree, share->path, nspec);
@@ -387,9 +428,7 @@ static void _unpack_ntree ( LptTree *tree,
     }
   /* children */
   for (i = 0; i < L_TUPLE_SIZE(children); i++)
-    _unpack_ntree(tree, share, base, L_TUPLE(L_TUPLE_ITEM(children, i)));
-  /* [fixme] */
-  l_object_unref(nspec);
+    _unpack_ntree(tree, client, share, base, L_TUPLE(L_TUPLE_ITEM(children, i)));
 }
 
 
@@ -405,16 +444,19 @@ static void _handle_connect_request ( LptTree *tree,
   LTuple *answer;
   LObject *ntree;
   LptShare *share;
+  LList *nspecs_list;
   _unpack_message(message, "is", &shareid, &name, NULL);
   share = g_hash_table_lookup(tree->shares_by_name, L_STRING(name)->str);
   ASSERT(share);
-  ntree = _pack_ntree(tree, share->root);
+  nspecs_list = l_list_new();
+  ntree = _pack_ntree(tree, share->root, client->sent_nspecs, nspecs_list);
   answer = l_tuple_new(4);
   l_tuple_give_item(answer, 0, L_OBJECT(l_int_new(LPT_MESSAGE_CONNECT_ACCEPT)));
   l_tuple_give_item(answer, 1, l_object_ref(shareid));
-  l_tuple_give_item(answer, 2, L_OBJECT(l_tuple_new(0))); /* nspecs */
+  l_tuple_give_item(answer, 2, L_OBJECT(l_tuple_new_from_list(nspecs_list)));
   l_tuple_give_item(answer, 3, ntree);
   tree->handler(tree, client, L_OBJECT(answer), tree->handler_data);
+  l_object_unref(nspecs_list);
   l_object_unref(answer);
 }
 
@@ -429,12 +471,33 @@ static void _handle_connect_accept ( LptTree *tree,
   LInt *shareid;
   LTuple *nspecs, *ntree;
   LptShare *share;
+  guint i;
   /* CL_DEBUG("connect_accept: %s", l_object_to_string(message)); */
   _unpack_message(message, "itt", &shareid, &nspecs, &ntree, NULL);
   share = g_hash_table_lookup(tree->shares_by_id,
                               GUINT_TO_POINTER(L_INT_VALUE(shareid)));
   ASSERT(share);
-  _unpack_ntree(tree, share, NULL, ntree);
+  /* create nspecs */
+  for (i = 0; i < L_TUPLE_SIZE(nspecs); i++)
+    {
+      LTuple *pack = L_TUPLE(L_TUPLE_ITEM(nspecs, i));
+      LInt *nsid;
+      LString *name;
+      LObject *state;
+      LptNSpec *nspec;
+      LObjectClass *cls;
+      ASSERT(L_TUPLE_SIZE(pack) == 3);
+      nsid = L_INT(L_TUPLE_ITEM(pack, 0));
+      name = L_STRING(L_TUPLE_ITEM(pack, 1));
+      state = L_TUPLE_ITEM(pack, 2);
+      cls = l_object_class_from_name(L_STRING(name)->str);
+      ASSERT(cls);
+      nspec = LPT_NSPEC(l_object_new_from_state(cls, state));
+      l_dict_insert(client->recv_nspecs, L_OBJECT(nsid), L_OBJECT(nspec));
+      l_object_unref(nspec);
+    }
+  /* create the node tree */
+  _unpack_ntree(tree, client, share, NULL, ntree);
 }
 
 
