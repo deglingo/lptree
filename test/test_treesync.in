@@ -6,6 +6,7 @@ header
 ##include "lptree/lpttree.h"
 ##include "lptree/lptnspecdir.h"
 ##include "lptree/lptnspecint.h"
+##include "los/lostest.h"
 }
 
 data
@@ -59,10 +60,11 @@ header
     PIF_CHECK(LPT_IS_NSPEC_DIR(n->nspec));      \
   } while (0)
 
-#define CHECK_NODE_INT(n_) do {                 \
-    LptNode *n = (n_);                          \
-    PIF_CHECK(n);                               \
-    PIF_CHECK(LPT_IS_NSPEC_INT(n->nspec));      \
+#define CHECK_NODE_INT(n_, val) do {                \
+    LptNode *n = (n_);                              \
+    PIF_CHECK(n);                                   \
+    PIF_CHECK(LPT_IS_NSPEC_INT(n->nspec));          \
+    LOS_CHECK_INT(lpt_node_get_value(n), (val));    \
   } while (0)
 
 test
@@ -85,8 +87,11 @@ test
   PIF_CHECK_EQ_PTR(lpt_client_get_tree(t2_c1), data->t2);
   g_hash_table_insert(t1_cmap, t1_c2, t2_c1);
   g_hash_table_insert(t2_cmap, t2_c1, t1_c2);
+  /* fix source values */
+  lpt_node_set_value(lpt_tree_get_node(data->t1, "/share1/node1"),
+                     L_TRASH_OBJECT(l_int_new(2)));
   /* connection */
   lpt_tree_connect_share(data->t2, t2_c1, "SHARE1", "/dest-share1", 0);
   CHECK_NODE_DIR(lpt_tree_get_node(data->t2, "/dest-share1"));
-  CHECK_NODE_INT(lpt_tree_get_node(data->t2, "/dest-share1/node1"));
+  CHECK_NODE_INT(lpt_tree_get_node(data->t2, "/dest-share1/node1"), 2);
 }

@@ -358,7 +358,10 @@ static void _pack_ntree_child ( LptNode *node,
   l_tuple_give_item(pack, 0, L_OBJECT(l_int_new(0))); /* nid */
   l_tuple_give_item(pack, 1, l_object_ref(nsid));
   l_tuple_give_item(pack, 2, l_object_ref(node->key));
-  l_tuple_give_item(pack, 3, L_OBJECT(l_int_new(0))); /* value */
+  if (lpt_nspec_get_value_type(node->nspec))
+    l_tuple_give_item(pack, 3, l_object_ref(lpt_node_get_value(node)));
+  else
+    l_tuple_give_item(pack, 3, L_OBJECT(l_none_ref()));
   children = l_tuple_new(lpt_node_get_n_children(node));
   data_children = data->children;
   data_n_children = data->n_children;
@@ -426,6 +429,9 @@ static void _unpack_ntree ( LptTree *tree,
       l_object_unref(node);
       base = node;
     }
+  /* value */
+  if (lpt_nspec_get_value_type(nspec))
+    lpt_node_set_value(base, value);
   /* children */
   for (i = 0; i < L_TUPLE_SIZE(children); i++)
     _unpack_ntree(tree, client, share, base, L_TUPLE(L_TUPLE_ITEM(children, i)));
