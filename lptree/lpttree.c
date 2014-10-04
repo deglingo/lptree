@@ -402,7 +402,7 @@ static void _pack_ntree_child ( LptNode *node,
   l_tuple_give_item(pack, 1, l_object_ref(nsid));
   l_tuple_give_item(pack, 2, l_object_ref(node->key));
   if (lpt_nspec_get_value_type(node->nspec))
-    l_tuple_give_item(pack, 3, l_object_ref(lpt_node_get_value(node)));
+    l_tuple_give_item(pack, 3, lpt_node_get_value(node));
   else
     l_tuple_give_item(pack, 3, L_OBJECT(l_none_ref()));
   children = l_tuple_new(lpt_node_get_n_children(node));

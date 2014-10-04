@@ -64,7 +64,8 @@ header
     LptNode *n = (n_);                              \
     PIF_CHECK(n);                                   \
     PIF_CHECK(LPT_IS_NSPEC_INT(n->nspec));          \
-    LOS_CHECK_INT(lpt_node_get_value(n), (val));    \
+    LOS_CHECK_INT(L_TRASH_OBJECT                    \
+                  (lpt_node_get_value(n)), (val));  \
   } while (0)
 
 test

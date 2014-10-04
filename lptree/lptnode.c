@@ -113,7 +113,7 @@ void lpt_node_set_value ( LptNode *node,
  */
 LObject *lpt_node_get_value ( LptNode *node )
 {
-  return node->value;
+  return l_object_ref(node->value);
 }
 
 
