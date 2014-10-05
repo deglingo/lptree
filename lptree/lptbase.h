@@ -11,4 +11,8 @@
 
 
 
+void lptree_init ( void );
+
+
+
 #endif

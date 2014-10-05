@@ -1,3 +1,13 @@
 /* -*- c -*- */
 
+header
+{
+##include "lptree/lptbase.h"
+}
+
+global_setup
+{
+  lptree_init();
+}
+
 test { PIF_CHECK(1); }
