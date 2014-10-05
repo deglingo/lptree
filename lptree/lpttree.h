@@ -93,7 +93,10 @@ void lpt_tree_connect_share ( LptTree *tree,
                               const gchar *dest_path,
                               guint flags );
 LptClient *lpt_tree_add_client ( LptTree *tree,
-                                 const gchar *name );
+                                 const gchar *name,
+                                 gpointer user_data,
+                                 GDestroyNotify destroy_data );
+gpointer lpt_client_get_data ( LptClient *client );
 
 /* private */
 void _lpt_tree_set_node_value ( LptTree *tree,

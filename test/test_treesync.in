@@ -68,6 +68,13 @@ header
                   (lpt_node_get_value(n)), (val));  \
   } while (0)
 
+test client_data
+{
+  gint *client_data = g_new0(gint, 1);
+  LptClient *client = lpt_tree_add_client(data->t1, "client", client_data, g_free);
+  PIF_CHECK_EQ_PTR(lpt_client_get_data(client), client_data);
+}
+
 test
 {
   LptClient *t1_c2, *t2_c1;
@@ -82,8 +89,9 @@ test
   /* setup the shares */
   lpt_tree_create_share(data->t1, "SHARE1", "/share1", 0);
   /* create the clients */
-  PIF_CHECK((t1_c2 = lpt_tree_add_client(data->t1, "t2")));
-  PIF_CHECK((t2_c1 = lpt_tree_add_client(data->t2, "t1")));
+  /* [fixme] use 'data' to map clients */
+  PIF_CHECK((t1_c2 = lpt_tree_add_client(data->t1, "t2", NULL, NULL)));
+  PIF_CHECK((t2_c1 = lpt_tree_add_client(data->t2, "t1", NULL, NULL)));
   PIF_CHECK_EQ_PTR(lpt_client_get_tree(t1_c2), data->t1);
   PIF_CHECK_EQ_PTR(lpt_client_get_tree(t2_c1), data->t2);
   g_hash_table_insert(t1_cmap, t1_c2, t2_c1);

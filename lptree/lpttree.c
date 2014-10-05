@@ -28,6 +28,8 @@ struct _LptClient
 {
   LptTree *tree;
   gchar *name;
+  gpointer data;
+  GDestroyNotify destroy_data;
   /* nspecs which have been sent : map < LInt *nsid, LptNspec *nspec > */
   LDict *sent_nspecs;
   /* nspecs which have been received : same */
@@ -84,11 +86,15 @@ static void _dispose ( LObject *object );
 /* lpt_client_new:
  */
 static LptClient *lpt_client_new ( LptTree *tree,
-                                   const gchar *name )
+                                   const gchar *name,
+                                   gpointer data,
+                                   GDestroyNotify destroy_data )
 {
   LptClient *client = g_new0(LptClient, 1);
   client->tree = tree;
   client->name = g_strdup(name);
+  client->data = data;
+  client->destroy_data = destroy_data;
   client->sent_nspecs = l_dict_new();
   client->recv_nspecs = l_dict_new();
   client->nodes_map = l_dict_new();
@@ -102,6 +108,8 @@ static LptClient *lpt_client_new ( LptTree *tree,
 static void lpt_client_free ( LptClient *client )
 {
   g_free(client->name);
+  if (client->destroy_data)
+    client->destroy_data(client->data);
   l_object_unref(client->sent_nspecs);
   l_object_unref(client->recv_nspecs);
   l_object_unref(client->nodes_map);
@@ -664,11 +672,22 @@ void lpt_tree_connect_share ( LptTree *tree,
 /* lpt_tree_add_client:
  */
 LptClient *lpt_tree_add_client ( LptTree *tree,
-                                 const gchar *name )
+                                 const gchar *name,
+                                 gpointer user_data,
+                                 GDestroyNotify destroy_data )
 {
-  LptClient *client = lpt_client_new(tree, name);
+  LptClient *client = lpt_client_new(tree, name, user_data, destroy_data);
   tree->clients = g_list_append(tree->clients, client);
   return client;
+}
+
+
+
+/* lpt_client_get_data:
+ */
+gpointer lpt_client_get_data ( LptClient *client )
+{
+  return client->data;
 }
 
 
