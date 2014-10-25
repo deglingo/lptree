@@ -2,10 +2,10 @@
 
 header
 {
+##include "test/lptcheck.h"
 ##include "lptree/lptnspecint.h"
 ##include "lptree/lptnspecdir.h"
 ##include "lptree/lptnode.h"
-##include <los/lostest.h>
 }
 
 setup
@@ -150,6 +150,27 @@ unit /* node-int */
     PIF_CHECK_EQ(lpt_node_get_n_children(ndir), 1);
     lpt_node_add(ndir, nchild2, key2);
     PIF_CHECK_EQ(lpt_node_get_n_children(ndir), 2);
+  }
+
+  test create_child
+  {
+    LptNode *root = L_TRASH_OBJECT
+      (lpt_node_new(data->ns_dir));
+    LObject *k1 = L_TRASH_STRING("n1");
+    LObject *k2 = L_TRASH_STRING("n2");
+    LptNode *n1, *n2;
+    n1 = lpt_node_create_child(root,
+                               data->ns_dir,
+                               k1,
+                               NULL);
+    CHECK_NODE_DIR(n1);
+    PIF_CHECK_EQ_PTR(n1, lpt_node_get_child(root, k1));
+    n2 = lpt_node_create_child(root,
+                               data->ns_int,
+                               k2,
+                               L_TRASH_INT(24));
+    CHECK_NODE_INT(n2, 24);
+    PIF_CHECK_EQ_PTR(n2, lpt_node_get_child(root, k2));
   }
 
   header

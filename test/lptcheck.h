@@ -6,6 +6,24 @@
 
 #include "lptree/lpttree.h"
 #include "lptree/lptnode.h"
+#include <los/lostest.h>
+
+#define CHECK_NODE_DIR(n) do {                          \
+    LptNode *_check_node = (n);                         \
+    PIF_CHECK(_check_node);                             \
+    PIF_CHECK(_check_node->nspec);                      \
+    PIF_CHECK(LPT_IS_NSPEC_DIR(_check_node->nspec));    \
+  } while (0)
+
+#define CHECK_NODE_INT(n, val) do {                     \
+    LptNode *_check_node = (n);                         \
+    PIF_CHECK(_check_node);                             \
+    PIF_CHECK(_check_node->nspec);                      \
+    PIF_CHECK(LPT_IS_NSPEC_INT(_check_node->nspec));    \
+    LOS_CHECK_INT                                       \
+      (L_TRASH_OBJECT(lpt_node_get_value(_check_node)), \
+       (val));                                          \
+  } while (0)
 
 struct check_node_tree_data
 {

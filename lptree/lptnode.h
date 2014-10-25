@@ -54,6 +54,10 @@ LObject *lpt_node_get_value ( LptNode *node );
 void lpt_node_add ( LptNode *node,
                     LptNode *child,
                     LObject *key );
+LptNode *lpt_node_create_child ( LptNode *node,
+                                 LptNSpec *nspec,
+                                 LObject *key,
+                                 LObject *value );
 guint lpt_node_get_n_children ( LptNode *node );
 LptNode *lpt_node_get_child ( LptNode *node,
                               LObject *key );

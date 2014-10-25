@@ -154,6 +154,24 @@ guint lpt_node_get_n_children ( LptNode *node )
 
 
 
+/* lpt_node_create_child:
+ */
+LptNode *lpt_node_create_child ( LptNode *node,
+                                 LptNSpec *nspec,
+                                 LObject *key,
+                                 LObject *value )
+{
+  LptNode *child;
+  child = lpt_node_new(nspec);
+  if (value)
+    lpt_node_set_value(child, value);
+  lpt_node_add(node, child, key);
+  l_object_unref(child);
+  return child;
+}
+
+
+
 /* lpt_node_get_child:
  */
 LptNode *lpt_node_get_child ( LptNode *node,
