@@ -135,7 +135,7 @@ void lpt_node_add ( LptNode *node,
                     LObject *key )
 {
   ASSERT(!child->tree);
-  ASSERT(L_IS_STRING(key));
+  ASSERT(key); /* ?? */
   if (node->tree)
     _fix_tree(child, node->tree);
   child->key = l_object_ref(key);
@@ -178,10 +178,10 @@ LptNode *lpt_node_get_child ( LptNode *node,
                               LObject *key )
 {
   GList *l;
-  ASSERT(L_IS_STRING(key));
+  ASSERT(key);
   for (l = node->children; l; l = l->next)
     {
-      if (!strcmp(L_STRING(key)->str, L_STRING(LPT_NODE(l->data)->key)->str))
+      if (l_object_eq(key, LPT_NODE(l->data)->key))
         return LPT_NODE(l->data);
     }
   return NULL;

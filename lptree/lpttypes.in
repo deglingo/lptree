@@ -12,6 +12,9 @@ namespace Lpt
   class NSpecDir : NSpec {
     void class_init ();
   };
+  class NSpecList : NSpec {
+    void class_init ();
+  };
   class Node {
     void class_init ();
     void init ();

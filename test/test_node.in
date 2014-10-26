@@ -5,6 +5,7 @@ header
 ##include "test/lptcheck.h"
 ##include "lptree/lptnspecint.h"
 ##include "lptree/lptnspecdir.h"
+##include "lptree/lptnspeclist.h"
 ##include "lptree/lptnode.h"
 }
 
@@ -55,6 +56,44 @@ unit node_dir
         PIF_CHECK_EQ_PTR(lpt_node_get_child(nroot, k[i]), n[i]);
         /* [TODO] PIF_CHECK_EQ_PTR(lpt_node_get_key(n[i]), k[i]); */
       }
+    }
+}
+
+unit node_list
+{
+  data
+    {
+      LptNSpec *ns_list, *ns_int;
+    }
+
+  setup
+    {
+      data->ns_list = L_TRASH_OBJECT
+        (lpt_nspec_list_new("LIST"));
+      data->ns_int = L_TRASH_OBJECT
+        (lpt_nspec_int_new("INT", G_MININT, G_MAXINT, 0));
+    }
+
+  test
+    {
+      LptNode *nroot, *n[10];
+      LObject *k[10];
+      guint i;
+      nroot = L_TRASH_OBJECT
+        (lpt_node_new(data->ns_list));
+      for (i = 0; i < 10; i++)
+        {
+          k[i] = L_TRASH_INT(i);
+          n[i] = lpt_node_create_child(nroot,
+                                       data->ns_int,
+                                       k[i],
+                                       k[i]);
+          CHECK_NODE_INT(n[i], i);
+        }
+      for (i = 0; i < 10; i++)
+        {
+          PIF_CHECK_EQ_PTR(lpt_node_get_child(nroot, k[i]), n[i]);
+        }
     }
 }
 

@@ -8,6 +8,7 @@ includelptree_HEADERS = \
 	lptevent.h \
 	lptnspec.h lptnspec-def.h \
 	lptnspecdir.h lptnspecdir-def.h \
+	lptnspeclist.h lptnspeclist-def.h \
 	lptnspecint.h lptnspecint-def.h \
 	lptnode.h lptnode-def.h \
 	lpttree.h lpttree-def.h
@@ -21,6 +22,7 @@ liblptree_la_SOURCES = \
 	lptpath.c \
 	lptnspec.c \
 	lptnspecdir.c \
+	lptnspeclist.c \
 	lptnspecint.c \
 	lptnode.c \
 	lpttree.c
@@ -28,17 +30,19 @@ liblptree_la_SOURCES = \
 BUILT_SOURCES = \
 	lptnspec-def.h lptnspec.inl \
 	lptnspecdir-def.h lptnspecdir.inl \
+	lptnspeclist-def.h lptnspeclist.inl \
 	lptnspecint-def.h lptnspecint.inl \
 	lptnode-def.h lptnode.inl \
 	lpttree-def.h lpttree.inl
 
 lptnspec-def.h lptnspec.inl \
 lptnspecdir-def.h lptnspecdir.inl \
+lptnspeclist-def.h lptnspeclist.inl \
 lptnspecint-def.h lptnspecint.inl \
 lptnode-def.h lptnode.inl \
 lpttree-def.h lpttree.inl \
 : lpttypes.stamp-h
 
 lpttypes.stamp-h: lpttypes.in
-	cpp $< | $(LOS_GENTYPES)
+	cpp $< | $(LOS_GENTYPES) -s $(srcdir) -u 'lptree/'
 	echo >$@

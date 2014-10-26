@@ -10,6 +10,7 @@ modules =
   test_nspec
   test_nspecint
   test_nspecdir
+  test_nspeclist
   test_node
   test_tree
   test_treesync

@@ -1,0 +1,38 @@
+/* -*- c -*- */
+
+header {
+##include "lptree/lptnspeclist.h"
+##include <string.h>
+}
+
+data { LptNSpec *nspec; }
+
+setup
+{
+  l_trash_push();
+  data->nspec = lpt_nspec_list_new("test-list");
+}
+
+teardown
+{
+  L_OBJECT_CLEAR(data->nspec);
+  l_trash_pop();
+}
+
+test {
+  PIF_CHECK(data->nspec);
+  PIF_CHECK(lpt_nspec_get_id(data->nspec)); /* ?? */
+  PIF_CHECK_EQ_PTR(lpt_nspec_get_value_type(data->nspec), NULL);
+  PIF_CHECK(!strcmp(data->nspec->name, "test-list"));
+}
+
+/* test get_state */
+/* { */
+/*   LObject *state = L_TRASH_OBJECT */
+/*     (l_object_get_state(L_OBJECT(data->nspec))); */
+/*   LObject *nspec2 = L_TRASH_OBJECT */
+/*     (l_object_new_from_state(LPT_CLASS_NSPEC_LIST, state)); */
+/*   PIF_CHECK(nspec2); */
+/*   PIF_CHECK(LPT_IS_NSPEC_LIST(nspec2)); */
+/*   PIF_CHECK_EQ_STR(LPT_NSPEC(nspec2)->name, "test-list"); */
+/* } */
